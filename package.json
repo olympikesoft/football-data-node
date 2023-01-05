@@ -1,0 +1,26 @@
+{
+  "name": "football-data",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "set NODE_ENV=development && node ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "cross-env": "^7.0.3",
+    "debug": "~2.6.9",
+    "dotenv": "^16.0.3",
+    "express": "~4.16.1",
+    "faker": "^6.6.6",
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^2.3.0",
+    "moment": "^2.29.4",
+    "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
+    "node-cron": "^3.0.2",
+    "passport": "^0.6.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0"
+  }
+}
