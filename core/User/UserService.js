@@ -5,51 +5,30 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 
 class UserService {
-  async existUser(param, source) {
-    let control = false;
-    let user = null;
+
+  async existUser(email) {
+    let existUser = false;
     try {
-      if (source === "fb") {
-        user = await knex.from("user").where("facebook_Id", param);
-      } else {
-        user = await knex.from("user").where("email", param);
-      }
-      if (user !== null && user.length > 0) {
-        control = true;
+      let user = await knex("user")
+        .where("user.email", email);
+      if (user.length > 0) {
+        existUser = true;
       }
     } catch (error) {
       console.log(error);
     }
-    return control;
-  }
-
-  async checkPermissionstoAction(user_id, admin) {
-    let havePermissions = false;
-    try {
-      if (admin) {
-        havePermissions = true;
-      }
-
-      let user = await this.GetInformaton(user_id);
-      console.log(user);
-      if (user[0]["Id"] === user_id) {
-        havePermissions = true;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    return havePermissions;
+    return existUser;
   }
 
   async register(email, name, mobile_phone, password) {
     let isRegistered = null;
     try {
-      const hashedPassword = functions.generateHash(password);
+      const hashedPassword = await functions.hashPassword(password);
       let form = {
         facebook_id: "no",
         IsValid: "y",
-        email: email,
-        name: name,
+        email,
+        name,
         password: hashedPassword,
         avatar_url:
           "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Coach_Yelling_Cartoon.svg/1024px-Coach_Yelling_Cartoon.svg.png",
@@ -76,30 +55,23 @@ class UserService {
   }
 
   async login(email, password) {
-    let user = null;
-    let user_content = null;
+    let token = {};
     try {
-      const hashedPassword = functions.generateHash(password);
-
-      user = await knex("user")
-        .select(["user.id", "user.name", "user.email"])
-        .where("email", email)
-        .where("password", hashedPassword);
-
-      if (user.length > 0) {
-        user_content = {};
-        const token = jwt.sign({ id: user[0].id }, process.env.secret, {
-          expiresIn: 86400, // expires in 24 hours
-        });
-        user_content = Object.assign(user_content, {
-          token: token,
-          user_id: user[0].id,
-        });
-      }
+      const hashedPassword = await functions.hashPassword(password);
+      let user = await knex("user")
+        .select(["user.id", "user.password", "user.email"])
+        .where("user.email", email)
+      await functions.comparePassword(password, hashedPassword).then((isMatch) => {
+          if (isMatch) {
+            token = jwt.sign({ id: user[0].id }, process.env.secret, {
+              expiresIn: 86400,
+            });
+          }
+    });
     } catch (error) {
       console.log(error);
     }
-    return user_content;
+    return token;
   }
 
   async getUser(user_id) {
@@ -118,36 +90,7 @@ class UserService {
     return userdata;
   }
 
-  async getUserFacebook(facebook_id) {
-    let user = null;
-    let userdata = null;
-    let today = moment().startOf("day");
-
-    try {
-      user = await knex("user")
-        .select("user.Id", "user.Admin", "user.subscriptionDays")
-        .where("user.Facebook_Id", "=", facebook_id);
-      if (user.length > 0) {
-        let user_content = { user: user[0].Id, Admin: user[0].Admin };
-        if (user[0].hasOwnProperty("subscriptionDays")) {
-          let date_final = moment(user[0].subscriptionDays, "DD/MM/YYYY");
-          if (date_final.isAfter(today)) {
-            user_content.hasSubscription = true;
-          }
-        }
-
-        const token = jwt.sign({ id: user[0].Id }, process.env.secret, {
-          expiresIn: 86400, // expires in 24 hours
-        });
-        userdata = Object.assign(user_content, { token: token });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    return userdata;
-  }
-
-  async UpdateUser(user_id, object) {
+  async updateUser(user_id, object) {
     let isUpdated = false;
       await knex("user")
         .where("id", user_id)

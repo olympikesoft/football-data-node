@@ -1,69 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const passport = require("passport");
 
-var UserController  = require('../core/User/UserController')
-const userControll = new UserController();
+const UserController = require("../core/User/UserController");
+const userController = new UserController();
 
+router.post("/login", (req, res) => {
+  userController.login(req, res);
+});
 
-router.post("/register/user", (req, res, next) =>
-  userControll.Register(req, res, next)
-);
+router.post("/register", (req, res) => {
+  userController.register(req, res);
+});
 
-router.post("/email", function (req, res, next) {
-  passport.authenticate("local", function (err, user, info) {
-    if (user !== undefined) {
-      if (user.error) {
-        res.status(200).send({ error: "Error on authentication" });
-      }
-      if (user.hasTeam != null) {
-        let token = user.token;
-        delete user["token"];
-        if (user.hasTeam === true) {
-          return res
-            .status(200)
-            .send({ token: token, user: user, path: "/squad" });
-        } else {
-          return res
-            .status(200)
-            .send({ token: token, user: user, path: "/chooseteam" });
-        }
-      } else {
-        return res.status(400).send({ error: "User not found" });
-      }
-    } else {
-      res.status(404).send({ error: "User not found" });
-    }
+/*
+router.post("/login", function (req, res, next) {
+  passport.authenticate("local", (err, user, info) => {
+    if (!user) return res.status(404).send({ error: "User not found" });
+    if (user.error) return res.status(200).send({ error: "Error on authentication" });
+    if (!user.hasTeam) return res.status(400).send({ error: "User not found" });
+    let token = user.token;
+    let path = user.hasTeam === true ? "/squad" : "/chooseteam";
+    delete user["token"];
+    return res.status(200).send({ token: token, user: user, path: path });
   })(req, res, next);
 });
+*/
 
-router.get("/success", function (req, res) {
-  let user = req.user;
-  if (err) {
-    console.log(err);
-  }
-  if (user !== undefined) {
-    if (user.error) {
-      res.status(200).send({ error: "Error on authentication" });
-    }
-    if (user.hasSubscription !== undefined) {
-      res.status(200).send({ token: user.token, admin: true });
-    } else {
-      res.status(200).send({ token: user.token, admin: false });
-    }
-  } else {
-    res.status(200).send({ error: "User not found" });
-  }
-});
+module.exports = router;
 
-router.get("/error", function (req, res) {
-  res.status(400).json({ message: "error" });
-});
-
-router.get("/get/user", checkAuth, (req, res, next) =>
-  userControll.GetUser(req, res, next)
-);
+/*
 
 router.get("/me", function (req, res) {
   var token = req.headers["x-access-token"];
@@ -78,6 +44,4 @@ router.get("/me", function (req, res) {
 
     res.status(200).send(decoded);
   });
-});
-
-module.exports = router;
+}); */

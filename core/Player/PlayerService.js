@@ -28,11 +28,10 @@ class PlayerService {
   /**
    *
    * @param {
-   * get players from manager_id
-   * get players from season
+   * get players from user_id
    * get players from team
    */
-  async getPlayersfromManager(manager_id) {
+  async getPlayersfromManager(user_id) {
     let players = [];
 
     try {
@@ -43,18 +42,13 @@ class PlayerService {
           "country.name as country_name",
         ])
         .from("team_has_player")
-        .where("team.manager_id", manager_id)
+        .where("manager.user_id", user_id)
         .leftJoin("player", "player.id", "team_has_player.Player_id")
         .leftJoin("team", "team.id", "team_has_player.team_id")
         .leftJoin("manager", "manager.id", "team.manager_id")
         .leftJoin("position", "position.id", "player.Position_id")
         .leftJoin("country", "country.id", "player.Country_id");
-
-      if (q != undefined) {
-        for (let index = 0; index < q.length; index++) {
-          players.push(q[index]);
-        }
-      }
+        players = q;
     } catch (error) {
       console.log(error);
     }
@@ -222,15 +216,12 @@ class PlayerService {
 
   async getPlayersbyId(id) {
     let players = null;
-    let CurrentYear = new Date().getFullYear();
     try {
       let q = await knex
         .select(["player.*", "position.name as position"])
         .from("player")
         .where("player.id", id)
-        .where('season.year', CurrentYear)
         .leftJoin("Position", "Position.id", "player.Position_id")
-        .leftJoin('season', 'season.id', 'player.season_id');
 
       if (q != null) {
         players = q[0];
@@ -351,11 +342,9 @@ class PlayerService {
         ])
         .from("team_has_player")
         .whereNull("team_has_player.team_id")
-        .where("season.year", currentYear)
         .leftJoin("player", "player.id", "team_has_player.Player_id")
         .leftJoin("position", "position.id", "player.Position_id")
         .leftJoin("country", "country.id", "player.Country_id")
-        .leftJoin("season", "season.id", "team_has_player.season_id")
         .leftJoin("team", "team.id", "team_has_player.team_id"));
 
       if (q) {
@@ -381,12 +370,10 @@ class PlayerService {
         ])
         .from("team_has_player")
         .whereNotNull("team_has_player.team_id")
-        .where("season.year", currentYear)
         .where('player.id', id)
         .leftJoin("player", "player.id", "team_has_player.Player_id")
         .leftJoin("position", "position.id", "player.Position_id")
         .leftJoin("country", "country.id", "player.Country_id")
-        .leftJoin("season", "season.id", "team_has_player.season_id")
         .leftJoin("team", "team.id", "team_has_player.team_id"));
       if (q) {
         q = players[0];
@@ -484,7 +471,7 @@ async GetPlayerPrice(player_id){
     return isCreated;
   }
 
-  async GetPlayerReport(player_id, season_id, team_id) {
+  async GetPlayerReport(player_id, team_id) {
     let players_reports = [];
 
     try {
@@ -492,13 +479,11 @@ async GetPlayerPrice(player_id){
         .select(["player_report.*"])
         .from("player_report")
         .where("player_report.player_id", player_id)
-        .where("team_has_player.season_id", season_id)
         .where("team_has_player.team_id", team_id)
         .where("player_report.team_id", team_id)
         .leftJoin("player", "player.id", "player_report.player_id")
         .leftJoin("matchs", "matchs.id", "player_report.match_id")
-        .leftJoin("team", "team.id", "player_report.team_id")
-        .leftJoin("season", "season.id", "team_has_player.season_id");
+        .leftJoin("team", "team.id", "player_report.team_id");
 
       if (q) {
         players_reports = q;
@@ -509,13 +494,12 @@ async GetPlayerPrice(player_id){
     return players_reports;
   }
 
-  async InsertPlayerToTeam(player_id, team_id, season_id) {
+  async InsertPlayerToTeam(player_id, team_id) {
     let isAddPlayer = true;
     try {
       let obj = {
         Player_id: player_id,
         team_id: team_id,
-        season_id: season_id,
       };
       await knex("team_has_player")
         .insert(obj)
@@ -559,7 +543,6 @@ async GetPlayerPrice(player_id){
     age_min
   ) {
     let players = null;
-    let CurrentYear = new Date().getFullYear();
     try {
       players = await knex
         .from("player")
@@ -588,8 +571,6 @@ async GetPlayerPrice(player_id){
             qb.where("middle_capacity", "<", middle_max);
           }
 
-          // qb.where('season.year', CurrentYear)
-
           if (aggressive) {
             qb.where("aggressivity_capacity", ">=", aggressive_min);
             qb.where("aggressivity_capacity", "<", aggresive_max);
@@ -614,7 +595,6 @@ async GetPlayerPrice(player_id){
             qb.where("date_birthday", "<", age_max);
           }
         })
-        .leftJoin("season", "season.id", "player.season_id")
         .leftJoin("team", "team.id", "player.teams_id")
         .leftJoin("positions", "positions.id", "player.positions_id");
     } catch (error) {

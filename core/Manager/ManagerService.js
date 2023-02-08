@@ -1,17 +1,14 @@
 var knex = require("../../knex");
 
 class ManagerService {
-  async getManagerbyId(id, season_id) {
+  async getManagerbyId(id) {
     let manager_details = null;
     try {
       let q = await knex
         .select(["user.name", "user.id", "user.avatar_url"])
         .from("manager")
         .where("manager.id", id)
-        .where("manager.season_id", season_id)
         .leftJoin("user", "user.id", "manager.user_id")
-        .leftJoin("season", "season.id", "manager.season_id");
-
       if (q != undefined) {
         manager_details = q[0];
       }
@@ -28,7 +25,7 @@ class ManagerService {
         .select(["manager.id"])
         .from("manager")
         .where("manager.user_id", id)
-        .leftJoin("user", "user.id", "manager.user_id");
+        .leftJoin("user", "user.id", "manager.user_id")
       if (q != undefined) {
         manager_details = q[0];
       }
@@ -38,17 +35,14 @@ class ManagerService {
     return manager_details;
   }
 
-  async getManagerbyUserId(id, season_id) {
+  async getManagerbyUserId(id) {
     let manager_details = null;
     try {
       let q = await knex
         .select(["manager.id"])
         .from("manager")
         .where("manager.user_id", id)
-        .where("manager.season_id", season_id)
         .leftJoin("user", "user.id", "manager.user_id")
-        .leftJoin("season", "season.id", "manager.season_id");
-
       if (q != undefined) {
         manager_details = q[0];
       }
@@ -104,7 +98,7 @@ class ManagerService {
     return exist;
   }
 
-  async CreateManager(object) {
+  async createManager(object) {
     let isCreated = false;
     try {
       await knex("manager")

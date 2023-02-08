@@ -11,6 +11,40 @@ class TeamService {
     return team;
   }
 
+  async getTeam(name) {
+    let team = null;
+    try {
+      team = await knex.from("team").where("name", name);
+    } catch (error) {
+      console.log("error", error);
+    }
+    return team;
+  }
+
+  async createTeam(name, manager_id, description, formationId){
+    let teamCreated = null;
+    try {
+      await knex("team")
+        .insert({
+          name,
+          manager_id,
+          description,
+          formationId
+        })
+        .then((result) => {
+          if (result) {
+            teamCreated = result[0];
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return teamCreated;
+  }
+
   /*
   async CreateTeamAutomatic(
     name,
@@ -46,8 +80,23 @@ class TeamService {
     return teamCreated;
   }*/
 
-  /*
-  async getTeamByUserId(user_id, season_id) {
+  async getTeamByUser(user_id) {
+    let team = [];
+    try {
+      team = await knex
+        .select(["team.*", "team_image.name_url as image_path"])
+        .from("team")
+        .where("manager.user_id", user_id)
+        .leftJoin("manager", "manager.id", "team.manager_id")
+        .leftJoin("user", "user.id", "manager.user_id")
+        .leftJoin("team_image", "team_image.id", "team.team_image_id")
+    } catch (error) {
+      console.log(error);
+    }
+    return team;
+  }
+
+  async getTeamByUserAndSeason(user_id, season_id) {
     let team = [];
     try {
       team = await knex
@@ -62,12 +111,10 @@ class TeamService {
         .leftJoin("season", "season.id", "manager.season_id");
     } catch (error) {
       console.log(error);
-      Sentry.captureException(error);
     }
     return team;
-  }*/
+  }
 
-  /*
   async getUserByTeam(team_id) {
     let user = [];
     try {
@@ -80,12 +127,11 @@ class TeamService {
         .leftJoin("team_image", "team_image.id", "team.team_image_id");
     } catch (error) {
       console.log(error);
-      Sentry.captureException(error);
     }
-
     return user;
   }
-
+  
+  /*
   async getTeamsByLeague(league_id) {
     let teams = null;
     try {
@@ -115,7 +161,6 @@ class TeamService {
         .leftJoin("team_image", "team_image.id", "team.team_image_id");
     } catch (error) {
       console.log(error);
-      Sentry.captureException(error);
     }
     return teams;
   }

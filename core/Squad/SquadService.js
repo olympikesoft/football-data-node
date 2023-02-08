@@ -200,7 +200,6 @@ class SquadService {
       isPlaying: isPlaying,
       status: 1,
     };
-    console.log(object);
     try {
       await knex
         .from("squad")

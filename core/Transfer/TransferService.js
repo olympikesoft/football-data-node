@@ -9,7 +9,6 @@ class TransferService {
    */
   async GetTransfers(team_id) {
     let players = [];
-
     try {
       let q = await knex
         .select([
@@ -44,7 +43,6 @@ class TransferService {
 
   async GetTransfersId(id, team_id) {
     let players = [];
-
     try {
       let q = await knex
         .select([
@@ -78,11 +76,11 @@ class TransferService {
     return players;
   }
 
-  async GetTransfersExcludingPlayers(team_id, players_ids, position_id) {
+  async GetTransfersExcludingPlayers(team_id, players_ids) {
+    console.log(team_id);
     let players = [];
     let q = null;
     try {
-      if (parseInt(position_id) > 0) {
         q = await knex
           .select([
             "transfers.id as transfer_id",
@@ -93,44 +91,11 @@ class TransferService {
           ])
           .from("transfers")
           .whereNot("transfers.seller_team_id", team_id)
-          .whereNull("buy_team_id")
-          .where("transfers.status", "1")
-          .where("position.id", parseInt(position_id))
+          .whereNull("transfers.buy_team_id")
           .whereNotIn("player.id", players_ids)
           .leftJoin("player", "player.id", "transfers.player_id")
           .leftJoin("team", "team.id", "transfers.seller_team_id")
-          .leftJoin("team_has_player", function () {
-            this.on("team_has_player.player_id", "player.id").on(
-              "team_has_player.team_id",
-              "team.id"
-            );
-          })
           .leftJoin("position", "position.id", "player.position_id");
-      } else {
-        q = await knex
-          .select([
-            "transfers.id as transfer_id",
-            "position.name as position_name",
-            "transfers.price",
-            "player.id as player_id",
-            "player.*",
-          ])
-          .from("transfers")
-          .whereNot("transfers.seller_team_id", team_id)
-          .whereNull("buy_team_id")
-          .where("transfers.status", "1")
-          .whereNotIn("player.id", players_ids)
-          .leftJoin("player", "player.id", "transfers.player_id")
-          .leftJoin("team", "team.id", "transfers.seller_team_id")
-          .leftJoin("team_has_player", function () {
-            this.on("team_has_player.player_id", "player.id").on(
-              "team_has_player.team_id",
-              "team.id"
-            );
-          })
-          .leftJoin("position", "position.id", "player.position_id");
-      }
-
       if (q) {
         players = q;
       }
@@ -192,7 +157,6 @@ class TransferService {
         ])
         .from("transfers")
         .where("transfers.id", id)
-        .where("transfers.status", "1")
         .leftJoin("team", "team.id", "transfers.seller_team_id")
         .leftJoin("player", "player.id", "transfers.player_id")
         .leftJoin("team_has_player", function () {

@@ -4,16 +4,17 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require('dotenv').config()
 
-require('./schedule/players')();
-require('./schedule/transfers')();
+//require('./schedule/players')();
+//require('./schedule/transfers')();
 
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var leagueRouter = require('./routes/league');
 var matchRouter = require('./routes/match');
 var teamRouter = require('./routes/team');
 var authRouter = require('./routes/auth');
+var transferRouter = require('./routes/transfer');
+var playerRouter = require('./routes/player');
 
 const port = 9000;
 
@@ -32,9 +33,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/league', leagueRouter);
 app.use('/match', matchRouter);
-app.use('/team', teamRouter);
-app.use('/auth', authRouter);
+app.use('/api/team', teamRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/transfer', transferRouter);
+app.use('/api/player', playerRouter);
 
 module.exports = app;
