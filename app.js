@@ -6,6 +6,7 @@ require('dotenv').config()
 
 //require('./schedule/players')();
 //require('./schedule/transfers')();
+require('./schedule/matches')();
 
 
 var indexRouter = require('./routes/index');
@@ -15,6 +16,7 @@ var teamRouter = require('./routes/team');
 var authRouter = require('./routes/auth');
 var transferRouter = require('./routes/transfer');
 var playerRouter = require('./routes/player');
+var squadRouter = require('./routes/squad');
 
 const port = 9000;
 
@@ -33,10 +35,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/match', matchRouter);
+app.use('/api/match', matchRouter);
 app.use('/api/team', teamRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/transfer', transferRouter);
 app.use('/api/player', playerRouter);
+app.use('/api/squad', squadRouter);
 
 module.exports = app;

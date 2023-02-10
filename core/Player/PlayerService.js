@@ -178,7 +178,7 @@ class PlayerService {
     return checkExist;
   }
 
-  async getPlayersManagerAndPosition(position, manager_id) {
+  async getPlayersManagerAndPosition(position, user_id) {
     let players = [];
 
     try {
@@ -195,7 +195,7 @@ class PlayerService {
           "country.name as country_name",
         ])
         .from("team_has_player")
-        .where("team.manager_id", manager_id)
+        .where("manager.user_id", user_id)
         .where("position.name", position)
         .leftJoin("player", "player.id", "team_has_player.Player_id")
         .leftJoin("team", "team.id", "team_has_player.team_id")

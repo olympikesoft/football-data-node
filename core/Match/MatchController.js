@@ -1,8 +1,8 @@
 var MatchService = require("./MatchService");
 var MatchService = new MatchService();
 
-var TeamReportService = require("../Report/TeamReportService");
-var TeamReportService = new TeamReportService();
+var TeamService = require("../Team/TeamService");
+var TeamService = new TeamService();
 
 var ManagerService = require("../Manager/ManagerService");
 var ManagerService = new ManagerService();
@@ -27,6 +27,51 @@ class MatchController {
         .json({ matches: matches, matchesNumber: matches.length });
     } catch (error) {
       console.log("error", error);
+    }
+  }
+
+  async inviteMatch(req, res, next) {
+    let userId = req.user.id;
+    let teamOpponentId = parseInt(req.body.teamOpponentId);
+    let today = new Date();
+    let tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const randomHour = `${7 + Math.floor(Math.random() * 17)}:${Math.floor(
+      Math.random() * 60
+    )}`;
+    try {
+      let team = await TeamService.getTeamByUser(userId);
+      let team_away = await TeamService.getTeamById(teamOpponentId);
+      if (!team && team.length === 0) {
+        return res.status(404).json({ Message: "No team" });
+      }
+      if (!team_away && team_away.length === 0) {
+        return res.status(404).json({ Message: "No team" });
+      }
+
+      let insertMatch = await MatchService.createMatch(
+        team[0].id,
+        team_away[0].id,
+        randomHour,
+        tomorrow
+      );
+      if (insertMatch) {
+        // update squad for team away
+        await SquadService.updateSquadCreatedAutomatic(
+          team_away[0].id,
+          insertMatch
+        );
+
+        // update squad for team home
+        await SquadService.updateSquadCreatedAutomatic(team[0].id, insertMatch);
+
+        return res.status(200).json({ insertMatch: insertMatch });
+      } else {
+        return res.status(200).json({ Message: "No Match create" });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
     }
   }
 

@@ -8,11 +8,11 @@ var score_away = 0;
 var events_history = [];
 var functions = require("../../utils/functions");
 
-export const getEvents = () => {
+ const getEvents = () => {
   return events_history;
 };
 
-export const SetEvents = (event_el) => {
+ const setEvents = (event_el) => {
   let events = getEvents();
   if (event_el != undefined && events != undefined) {
     events.push(event_el);
@@ -20,7 +20,7 @@ export const SetEvents = (event_el) => {
   console.log(`${event_el}`);
 };
 
-export const averagePlayerValues = (string, team_players, number_redcards) => {
+ const averagePlayerValues = (string, team_players, number_redcards) => {
   let number_players = team_players.filter(
     (player) => player.isplaying === 1
   ).length;
@@ -41,7 +41,7 @@ export const averagePlayerValues = (string, team_players, number_redcards) => {
   return totalValues / number_players;
 };
 
-export const GetScorersFromTeam = (team_players) => {
+ const GetScorersFromTeam = (team_players) => {
   let array_scorers = [];
 
   if (team_players.length > 0) {
@@ -62,22 +62,15 @@ export const GetScorersFromTeam = (team_players) => {
   return array_scorers;
 };
 
-export const GetScoreFromTeam = (team_players) => {
+ const getScoreFromTeam = (team_players) => {
   return team_players.reduce(function (acc, obj) {
     return acc + obj.goals_scored;
   }, 0);
 };
 
-export const GetRedCardFromHomeTeam = () => {
-  return redCards_home;
-};
-
-export const GetRedCardFromAwayTeam = () => {
-  return redCard_away;
-};
-
-export const setupEvent = (attackingTeam, matchTime) => {
-  if (genRandomValue(20) % 4 === 0) {
+ const setupEvent = (attackingTeam, matchTime) => {
+  let randomValue = genRandomValue(20);
+  if (randomValue % 4 === 0) {
     increaseValues(3, attackingTeam["team_players"], "attack_capacity", [
       "midfielder",
       "striker",
@@ -90,15 +83,15 @@ export const setupEvent = (attackingTeam, matchTime) => {
     const attackingPlayer = randomPlayer(
       attackingTeam["team_players"],
       true
-    ); /* put defense and other option after*/
+    );
+     /* put defense and other option after*/
     let team_attacking = attackingTeam.details;
-
     // '' === No player passed in
     generateCommentary("chance", attackingPlayer, matchTime, team_attacking);
   }
 };
 
-export const randomSubstitute = (position, team_players, matchTime) => {
+ const randomSubstitute = (position, team_players, matchTime) => {
   const arrayOfSuitablePlayers = team_players.filter(
     (player) =>
       player.position === position &&
@@ -111,7 +104,7 @@ export const randomSubstitute = (position, team_players, matchTime) => {
   return arrayOfSuitablePlayers[randomIndex];
 };
 
-export const randomPlayerByPosition = (position, team_players, sub) => {
+ const randomPlayerByPosition = (position, team_players, sub) => {
   if (
     team_players === undefined ||
     position === undefined ||
@@ -129,7 +122,7 @@ export const randomPlayerByPosition = (position, team_players, sub) => {
   return arrayOfSuitablePlayers[randomIndex];
 };
 
-export const randomPlayer = (team_players, isAttacking) => {
+ const randomPlayer = (team_players, isAttacking) => {
   var arrayOfPlayersOnField = null;
   if (isAttacking) {
     arrayOfPlayersOnField = team_players.filter(
@@ -144,7 +137,7 @@ export const randomPlayer = (team_players, isAttacking) => {
   return arrayOfPlayersOnField[randomIndex];
 };
 
-export const increaseValues = (
+ const increaseValues = (
   value,
   team_players,
   attribute,
@@ -159,7 +152,7 @@ export const increaseValues = (
   }
 };
 
-export const reduceValues = (
+ const reduceValues = (
   value,
   team_players,
   attribute,
@@ -178,7 +171,7 @@ export const reduceValues = (
   }
 };
 
-export const generateCommentary = (scenario, player, matchTime, team) => {
+ const generateCommentary = (scenario, player, matchTime, team) => {
   const commentary = {
     goal: [
       `Goal! from ${player.name}`,
@@ -259,7 +252,8 @@ export const generateCommentary = (scenario, player, matchTime, team) => {
   if (scenario === "goal") {
     player.rating = player.rating >= 10 ? player.rating + 1.5 : 9.5;
     player.goals_scored = player.goals_scored + 1;
-    player.goals_score_array.push({
+    player.goals_score = [];
+    player.goals_score.push({
       minute: matchTime,
       comment: commentary[scenario][0],
     });
@@ -283,20 +277,20 @@ export const generateCommentary = (scenario, player, matchTime, team) => {
     player: player,
     team: team,
   };
-  SetEvents(message);
+  setEvents(message);
 };
 
-export const getMinutesToPlay = () => {
+ const getMinutesToPlay = () => {
   let number = Math.random(90, 95);
   return number;
 };
 
-export const genRandomValue = (value) => {
+ const genRandomValue = (value) => {
   return Math.floor(Math.random() * value);
 };
 
 /*
-export const move = (homeTeam, awayTeam) =>{
+ const move = (homeTeam, awayTeam) =>{
 
     //const homeBar = document.getElementById('homeBar');
 
@@ -306,7 +300,7 @@ export const move = (homeTeam, awayTeam) =>{
     //homeBar.style.width = width + '%';
 }*/
 
-export const selectTeam = (homeTeam, awayTeam) => {
+ const selectTeam = (homeTeam, awayTeam) => {
   let average_Team_Home_skills = averagePlayerValues(
     "skills_capacity",
     homeTeam.team_players,
@@ -364,14 +358,13 @@ export const selectTeam = (homeTeam, awayTeam) => {
   }
 };
 
-export const goalChance = (
+ const goalChance = (
   attackingTeam,
   defendingTeam,
   matchTime,
   team_home_move,
   team_away_move
 ) => {
-  // Refactor this
   const attackingPlayer = randomPlayer(
     attackingTeam["team_players"],
     true
@@ -384,9 +377,9 @@ export const goalChance = (
   let team_attacking = attackingTeam.details;
   let team_deffending = defendingTeam.details;
 
-  console.log(
-    ` attackingPlayer - ${attackingPlayer.attack_capacity} | defendingPlayer - ${defendingPlayer.name} | ${defendingPlayer.deffense_capacity}`
-  );
+ // console.log(
+ //   ` attackingPlayer - ${attackingPlayer.attack_capacity} | defendingPlayer - ${defendingPlayer.name} | ${defendingPlayer.deffense_capacity}`
+ // );
 
   if (attackingPlayer.attack_capacity > 0) {
     if (
@@ -440,7 +433,7 @@ export const goalChance = (
   }
 };
 
-export const handleDiscipline = (attackingTeam, defendingTeam, matchTime) => {
+ const handleDiscipline = (attackingTeam, defendingTeam, matchTime) => {
   // Refactor
   // ATTACKING TEAM REDUNDANT
   // teamString can be substituted for defendingTeam.place
@@ -501,7 +494,7 @@ export const handleDiscipline = (attackingTeam, defendingTeam, matchTime) => {
   }
 };
 
-export const handleInjury = (attackingTeam, matchTime) => {
+ const handleInjury = (attackingTeam, matchTime) => {
   const attackingPlayer = randomPlayer(attackingTeam["team_players"], true);
   let team_attacking = attackingTeam.details;
   if (genRandomValue(101) % 40 === 0) {
@@ -527,7 +520,7 @@ export const handleInjury = (attackingTeam, matchTime) => {
   }
 };
 
-export const handleFreekick = (
+ const handleFreekick = (
   attackingTeam,
   defendingTeam,
   matchTime,
@@ -536,7 +529,6 @@ export const handleFreekick = (
 ) => {
   let minute = functions.convertFloatMinutes(matchTime);
   let team_attacking = attackingTeam.details;
-  let team_deffending = defendingTeam.details;
   const attackingPlayer = randomPlayerByPosition(
     "midfielder",
     attackingTeam["team_players"]
@@ -546,7 +538,8 @@ export const handleFreekick = (
     defendingTeam["team_players"]
   );
 
-  if (attackingPlayer.attack_capacity > defendingPlayer.deffense_capacity) {
+
+  if (defendingPlayer !== undefined && defendingPlayer.deffense_capacity !== undefined && attackingPlayer.attack_capacity > defendingPlayer.deffense_capacity) {
     generateCommentary("freekick", attackingPlayer, matchTime, team_attacking);
     console.log(`${minute} mins: ${attackingPlayer.name} scored<br/>`);
     updateScore(team_home_move, team_away_move);
@@ -576,7 +569,7 @@ export const handleFreekick = (
   }
 };
 
-export const handlePenalty = (
+ const handlePenalty = (
   attackingTeam,
   defendingTeam,
   matchTime,
@@ -606,7 +599,7 @@ export const handlePenalty = (
     console.log(`${minute} mins: ${bookedPlayer.name} booked<br/>`);
   }
 
-  if (attackingPlayer.attack_capacity != undefined) {
+  if (attackingPlayer && attackingPlayer.attack_capacity != undefined) {
     if (
       genRandomValue(attackingPlayer.attack_capacity) * 2 >
       genRandomValue(defendingPlayer.deffense_capacity) +
@@ -632,10 +625,13 @@ export const handlePenalty = (
   }
 };
 
-export const straightRed = (defendingTeam, matchTime) => {
+ const straightRed = (defendingTeam, matchTime) => {
   let team_deffending = defendingTeam.details;
 
   const defendingPlayer = randomPlayer(defendingTeam["team_players"], false);
+  while(defendingPlayer.position === 'goalkeper'){
+    defendingPlayer = randomPlayer(defendingTeam["team_players"], false);
+  }
   if (genRandomValue(defendingPlayer.aggressive) + (100 - matchTime) < 25) {
     defendingPlayer.isplaying = 0;
     defendingPlayer.status = "ejected";
@@ -651,7 +647,7 @@ export const straightRed = (defendingTeam, matchTime) => {
   }
 };
 
-export const updateScore = (team_home_move, team_away_move) => {
+ const updateScore = (team_home_move, team_away_move) => {
   if (team_home_move) {
     score_home = score_home + 1;
     console.log(
@@ -665,14 +661,14 @@ export const updateScore = (team_home_move, team_away_move) => {
   }
 };
 
-export const randomPosition = () => {
+ const randomPosition = () => {
   const randomIndex = genRandomValue(positions.length) + 1;
   const chosenPosition = positions[randomIndex];
   return [chosenPosition];
 };
 
 /*
-  export const substitute = (teamObject, player, matchTime) =>  {
+   const substitute = (teamObject, player, matchTime) =>  {
     console.log('substitute');
 
     if (teamObject.subs < 7) {
@@ -711,5 +707,5 @@ module.exports = {
   increaseValues,
   goalChance,
   getMinutesToPlay,
-  GetScoreFromTeam,
+  getScoreFromTeam,
 };

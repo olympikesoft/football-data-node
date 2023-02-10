@@ -9,8 +9,6 @@ class SquadService {
 
   async getSquadDefinedWithoutMatch(team_id) {
     let players = [];
-    let CurrentYear = new Date().getFullYear();
-
     try {
       let q = await knex
         .select([
@@ -30,12 +28,10 @@ class SquadService {
         .whereNull("squad.match_id")
         .where("squad.team_id", team_id)
         .where("squad.status", "1")
-        .where("season.year", CurrentYear)
         .leftJoin("position", "position.id", "squad.Position_id")
         .leftJoin("team", "team.id", "squad.team_id")
         // .leftJoin('matchs', 'matchs.id', 'squad.match_id')
-        .leftJoin("player", "player.id", "squad.Player_id")
-        .leftJoin("season", "season.id", "squad.season_id");
+        .leftJoin("player", "player.id", "squad.Player_id");
 
       if (q) {
         if (q.length > 0) {
@@ -74,10 +70,8 @@ class SquadService {
         .whereNull("squad.match_id")
         .where("squad.team_id", team_id)
         .where("squad.status", "1")
-        .where("season.year", CurrentYear)
         .leftJoin("position", "position.id", "squad.Position_id")
         .leftJoin("player", "player.id", "squad.Player_id")
-        .leftJoin("season", "season.id", "squad.season_id")
         .orderBy("player.id");
 
       if (q) {
@@ -117,7 +111,6 @@ class SquadService {
         .leftJoin("position", "position.id", "squad.Position_id")
         .leftJoin("team", "team.id", "squad.team_id")
         .leftJoin("player", "player.id", "squad.Player_id")
-        .leftJoin("season", "season.id", "squad.season_id");
 
       if (q) {
         if (q.length > 0) {
@@ -131,7 +124,6 @@ class SquadService {
   }
 
   async ChangePlayerSquad(squad_id, Player_id, Isplaying) {
-    let CurrentYear = new Date().getFullYear();
     let updated = false;
     try {
       await knex
@@ -139,8 +131,6 @@ class SquadService {
         .update({ Player_id: Player_id, IsPlaying: Isplaying })
         .whereNull("squad.match_id")
         .where("squad.id", squad_id)
-        .where("season.year", CurrentYear)
-        .leftJoin("season", "season.id", "squad.season_id")
         .then((res) => {
           if (res) {
             updated = true;
@@ -157,24 +147,22 @@ class SquadService {
 
   async getSquadByMatch(team_id, match_id) {
     let players = [];
-    let CurrentYear = new Date().getFullYear();
 
     try {
       let q = await knex
         .select([
-          "squad.Player_id as player_id",
           "squad.Position_id as position_id",
           "squad.Isplaying as isplaying",
+          "player.*",
+          "position.name as position"
         ])
         .from("squad")
         .where("squad.team_id", team_id)
         .where("squad.match_id", match_id)
-        .where("season.year", CurrentYear)
         .leftJoin("position", "position.id", "squad.Position_id")
         .leftJoin("team", "team.id", "squad.team_id")
         .leftJoin("matchs", "matchs.id", "squad.match_id")
-        .leftJoin("player", "player.id", "squad.Player_id")
-        .leftJoin("season", "season.id", "squad.season_id");
+        .leftJoin("player", "player.id", "squad.Player_id");
 
       if (q) {
         if (q.length > 0) {
@@ -189,14 +177,13 @@ class SquadService {
     return players;
   }
 
-  async GenerateSquad(team_id, Player_id, Position_id, isPlaying, season_id) {
+  async generateSquad(team_id, Player_id, Position_id, isPlaying) {
     let haveInserted = false;
 
     let object = {
       team_id: team_id,
       Player_id: Player_id,
       Position_id: Position_id,
-      season_id: season_id,
       isPlaying: isPlaying,
       status: 1,
     };
@@ -218,14 +205,13 @@ class SquadService {
     return haveInserted;
   }
 
-  async UpdateSquadTeamMatch(array_players_team, team_id, match_id, season_id) {
+  async UpdateSquadTeamMatch(array_players_team, team_id, match_id) {
     let haveInserted = false;
     for (let index = 0; index < array_players_team.length; index++) {
       let object = {
         team_id: team_id,
         Player_id: array_players_team[index].id,
         Position_id: array_players_team[index].position_id,
-        season_id: season_id,
         isPlaying: array_players_team[index].isplaying,
         match_id: match_id,
       };
@@ -248,6 +234,30 @@ class SquadService {
       }
     }
     return haveInserted;
+  }
+
+  async updateSquadCreatedAutomatic(team_id, match_id){
+    let updated = false;
+      try {
+        await knex
+          .from("squad")
+          .update({ match_id: match_id })
+          .leftJoin('position', 'position.id', 'squad.Position_id')
+          .leftJoin('team', 'team.id', 'squad.team_id')
+          .leftJoin('matchs', 'matchs.id', 'squad.match_id')
+          .leftJoin('player', 'player.id', 'squad.Player_id')
+          .where('squad.team_id', team_id)
+          .where("squad.status", 1)
+          .whereNull("squad.match_id")
+          .then((res) => {
+            if (res) {
+              updated = true;
+            }
+          });
+      } catch (error) {
+        console.log(error);
+    }
+    return updated;
   }
 }
 
