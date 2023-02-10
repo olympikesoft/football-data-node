@@ -35,7 +35,7 @@ const matchSimulator = (matches, play) => {
 
         const eventValue = actions.genRandomValue(100) + 1;
 
-        if (eventValue > 20 && eventValue <= 25) {
+        if (eventValue > 20 && eventValue <= 23) {
           // Random (Striker, Midfielder) vs. Goalkeeper > RandTheirAttack vs. RandGoalkeeper
           console.log(
             "Random (Striker, Midfielder) vs. Goalkeeper > RandTheirAttack vs. RandGoalkeeper"
@@ -53,7 +53,7 @@ const matchSimulator = (matches, play) => {
             ["midfielder", "striker"]
           );
           actions.reduceValues(
-            actions.genRandomValue(3),
+            actions.genRandomValue(10),
             defendingTeam["team_players"],
             "deffense_capacity",
             ["midfielder", "defender", "goalkeeper"]
@@ -72,23 +72,23 @@ const matchSimulator = (matches, play) => {
             home_team.team_players
           );
           match_summary.events = actions.getEvents();
-        } else if (eventValue > 30 && eventValue <= 32) {
+        } else if (eventValue % 31 === 0) {
           console.log("Goal Chance");
 
           actions.reduceValues(
-            actions.genRandomValue(20),
+            actions.genRandomValue(4),
             attackingTeam["team_players"],
             "deffense_capacity",
             ["midfielder", "defender", "goalkeeper"]
           );
           actions.reduceValues(
-            actions.genRandomValue(20),
+            actions.genRandomValue(4),
             attackingTeam["team_players"],
             "attack_capacity",
             ["midfielder", "defender", "goalkeeper"]
           );
           actions.increaseValues(
-            actions.genRandomValue(20),
+            actions.genRandomValue(4),
             defendingTeam["team_players"],
             "attack_capacity",
             ["midfielder", "striker"]
@@ -108,11 +108,11 @@ const matchSimulator = (matches, play) => {
             home_team.team_players
           );
           match_summary.events = actions.getEvents();
-        } else if (eventValue > 40 && eventValue <= 42) {
+        } else if (eventValue % 42 === 0) {
           console.log("Penalti chance");
 
           actions.reduceValues(
-            actions.genRandomValue(10),
+            actions.genRandomValue(5),
             defendingTeam["team_players"],
             "deffense_capacity",
             ["midfielder", "defender", "goalkeeper"]
@@ -155,15 +155,15 @@ const matchSimulator = (matches, play) => {
           );
 
           match_summary.events = actions.getEvents();*/
-        } else if (eventValue > 60 && eventValue <= 70) {
+        } else if (eventValue % 60 === 0) {
           actions.increaseValues(
-            5,
+            2,
             attackingTeam["team_players"],
             "attack_capacity",
             ["midfielder", "striker"]
           );
           actions.increaseValues(
-            5,
+            2,
             defendingTeam["team_players"],
             "attack_capacity",
             ["midfielder", "striker"]
@@ -218,7 +218,8 @@ const matchSimulator = (matches, play) => {
           match_summary.events = actions.getEvents();*/
         } else {
           console.log("default");
-          actions.setupEvent(attackingTeam, matchTime);
+          actions.setupEvent(attackingTeam, matchTime, true);
+          actions.setupEvent(defendingTeam, matchTime, false);
         }
 
         // reduce energy from players
@@ -259,7 +260,7 @@ const matchSimulator = (matches, play) => {
         resolve(match);
         clearInterval(timerID);
       }
-    }, 200);
+    }, 5);
   });
 };
 

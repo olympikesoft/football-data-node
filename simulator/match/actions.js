@@ -8,11 +8,11 @@ var score_away = 0;
 var events_history = [];
 var functions = require("../../utils/functions");
 
- const getEvents = () => {
+const getEvents = () => {
   return events_history;
 };
 
- const setEvents = (event_el) => {
+const setEvents = (event_el) => {
   let events = getEvents();
   if (event_el != undefined && events != undefined) {
     events.push(event_el);
@@ -20,7 +20,7 @@ var functions = require("../../utils/functions");
   console.log(`${event_el}`);
 };
 
- const averagePlayerValues = (string, team_players, number_redcards) => {
+const averagePlayerValues = (string, team_players, number_redcards) => {
   let number_players = team_players.filter(
     (player) => player.isplaying === 1
   ).length;
@@ -41,57 +41,49 @@ var functions = require("../../utils/functions");
   return totalValues / number_players;
 };
 
- const GetScorersFromTeam = (team_players) => {
-  let array_scorers = [];
 
-  if (team_players.length > 0) {
-    for (let index = 0; index < team_players.length; index++) {
-      if (
-        team_players[index].goals_scored > 0 &&
-        team_players[index].goals_score_array.length > 0
-      ) {
-        for (let k = 0; k < team_players[index].goals_score_array.length; k++) {
-          array_scorers.push({
-            minute: team_players[index].goals_score_array[k].minute,
-            name: team_players[index].name,
-          });
-        }
-      }
-    }
-  }
-  return array_scorers;
-};
-
- const getScoreFromTeam = (team_players) => {
+const getScoreFromTeam = (team_players) => {
   return team_players.reduce(function (acc, obj) {
     return acc + obj.goals_scored;
   }, 0);
 };
 
- const setupEvent = (attackingTeam, matchTime) => {
-  let randomValue = genRandomValue(20);
-  if (randomValue % 4 === 0) {
+const setupEvent = (attackingTeam, matchTime, isAttacking) => {
+  let randomValue = genRandomValue(100) + 1;
+  if (randomValue > 2 && randomValue <= 5 && isAttacking) {
     increaseValues(3, attackingTeam["team_players"], "attack_capacity", [
+      "deffender",
       "midfielder",
       "striker",
     ]);
     increaseValues(3, attackingTeam["team_players"], "skills_capacity", [
       "midfielder",
+      "deffender",
       "striker",
     ]);
 
-    const attackingPlayer = randomPlayer(
-      attackingTeam["team_players"],
-      true
-    );
-     /* put defense and other option after*/
+    const attackingPlayer = randomPlayer(attackingTeam["team_players"], true);
+    /* put defense and other option after*/
     let team_attacking = attackingTeam.details;
     // '' === No player passed in
     generateCommentary("chance", attackingPlayer, matchTime, team_attacking);
   }
+
+  reduceValues(3, attackingTeam["team_players"], "attack_capacity", [
+    "striker",
+    "midfielder",
+    "defender",
+    "goalkeeper",
+  ]);
+  reduceValues(3, attackingTeam["team_players"], "deffense_capacity", [
+    "striker",
+    "midfielder",
+    "defender",
+    "goalkeeper",
+  ]);
 };
 
- const randomSubstitute = (position, team_players, matchTime) => {
+const randomSubstitute = (position, team_players, matchTime) => {
   const arrayOfSuitablePlayers = team_players.filter(
     (player) =>
       player.position === position &&
@@ -104,7 +96,7 @@ var functions = require("../../utils/functions");
   return arrayOfSuitablePlayers[randomIndex];
 };
 
- const randomPlayerByPosition = (position, team_players, sub) => {
+const randomPlayerByPosition = (position, team_players, sub) => {
   if (
     team_players === undefined ||
     position === undefined ||
@@ -122,7 +114,7 @@ var functions = require("../../utils/functions");
   return arrayOfSuitablePlayers[randomIndex];
 };
 
- const randomPlayer = (team_players, isAttacking) => {
+const randomPlayer = (team_players, isAttacking) => {
   var arrayOfPlayersOnField = null;
   if (isAttacking) {
     arrayOfPlayersOnField = team_players.filter(
@@ -137,12 +129,7 @@ var functions = require("../../utils/functions");
   return arrayOfPlayersOnField[randomIndex];
 };
 
- const increaseValues = (
-  value,
-  team_players,
-  attribute,
-  arrayOfPositions
-) => {
+const increaseValues = (value, team_players, attribute, arrayOfPositions) => {
   const arrayOfPlayersOnField = team_players.filter(
     (player) =>
       player.isplaying === 1 && arrayOfPositions.includes(player.position)
@@ -152,12 +139,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const reduceValues = (
-  value,
-  team_players,
-  attribute,
-  arrayOfPositions
-) => {
+const reduceValues = (value, team_players, attribute, arrayOfPositions) => {
   if (team_players.length > 0) {
     const arrayOfPlayersOnField = team_players.filter(
       (player) =>
@@ -171,7 +153,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const generateCommentary = (scenario, player, matchTime, team) => {
+const generateCommentary = (scenario, player, matchTime, team) => {
   const commentary = {
     goal: [
       `Goal! from ${player.name}`,
@@ -252,6 +234,7 @@ var functions = require("../../utils/functions");
   if (scenario === "goal") {
     player.rating = player.rating >= 10 ? player.rating + 1.5 : 9.5;
     player.goals_scored = player.goals_scored + 1;
+    player.stamina = player.stamina - 2;
     player.goals_score = [];
     player.goals_score.push({
       minute: matchTime,
@@ -280,12 +263,12 @@ var functions = require("../../utils/functions");
   setEvents(message);
 };
 
- const getMinutesToPlay = () => {
+const getMinutesToPlay = () => {
   let number = Math.random(90, 95);
   return number;
 };
 
- const genRandomValue = (value) => {
+const genRandomValue = (value) => {
   return Math.floor(Math.random() * value);
 };
 
@@ -300,7 +283,7 @@ var functions = require("../../utils/functions");
     //homeBar.style.width = width + '%';
 }*/
 
- const selectTeam = (homeTeam, awayTeam) => {
+const selectTeam = (homeTeam, awayTeam) => {
   let average_Team_Home_skills = averagePlayerValues(
     "skills_capacity",
     homeTeam.team_players,
@@ -358,7 +341,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const goalChance = (
+const goalChance = (
   attackingTeam,
   defendingTeam,
   matchTime,
@@ -377,26 +360,45 @@ var functions = require("../../utils/functions");
   let team_attacking = attackingTeam.details;
   let team_deffending = defendingTeam.details;
 
- // console.log(
- //   ` attackingPlayer - ${attackingPlayer.attack_capacity} | defendingPlayer - ${defendingPlayer.name} | ${defendingPlayer.deffense_capacity}`
- // );
+  // console.log(
+  //   ` attackingPlayer - ${attackingPlayer.attack_capacity} | defendingPlayer - ${defendingPlayer.name} | ${defendingPlayer.deffense_capacity}`
+  // );
 
-  if (attackingPlayer.attack_capacity > 0) {
-    if (
-      genRandomValue(attackingPlayer.attack_capacity) >
-      genRandomValue(defendingPlayer.deffense_capacity)
-    ) {
-      generateCommentary("goal", attackingPlayer, matchTime, team_attacking);
-      updateScore(team_home_move, team_away_move);
+  if (
+    Math.trunc(attackingPlayer.attack_capacity) >
+      Math.trunc(defendingPlayer.deffense_capacity) &&
+    Math.trunc(attackingPlayer.speed_capacity) >
+      Math.trunc(defendingPlayer.speed_capacity) &&
+    Math.trunc(attackingPlayer.stamina) > Math.trunc(defendingPlayer.stamina)
+  ) {
+    generateCommentary("goal", attackingPlayer, matchTime, team_attacking);
+    updateScore(team_home_move, team_away_move);
 
-      attackingPlayer.stamina -= 30;
-      defendingPlayer.stamina -= 20;
+    reduceValues(
+      2,
+      attackingTeam["team_players"],
+      "speed_capacity",
+      ["deffender", "stricker", "midfielder"]
+    );
 
-      // Refactor these messages - use a  which passes in player, teamObject, color and icon name
-      // console.log($(`#${attackingTeam.place}Events`).append(`<i class='fa fa-futbol-o' style='color:white;' aria-hidden='true'></i> ${matchTime} mins: ${attackingPlayer.name} scored<br/>`))
+    reduceValues(
+      2,
+      attackingTeam["team_players"],
+      "stamina",
+      ["deffender", "stricker", "midfielder"]
+    );
 
-      console.log(`${matchTime} mins: ${attackingPlayer.name} scored<br/>`);
-    }
+    reduceValues(
+      2,
+      defendingTeam["team_players"],
+      "stamina",
+      ["deffender", "stricker", "midfielder"]
+    );
+
+    // Refactor these messages - use a  which passes in player, teamObject, color and icon name
+    // console.log($(`#${attackingTeam.place}Events`).append(`<i class='fa fa-futbol-o' style='color:white;' aria-hidden='true'></i> ${matchTime} mins: ${attackingPlayer.name} scored<br/>`))
+
+    console.log(`${matchTime} mins: ${attackingPlayer.name} scored<br/>`);
   } else {
     /*home team => attackingPlayer*/
     const attackingPlayer = randomPlayerByPosition(
@@ -405,16 +407,16 @@ var functions = require("../../utils/functions");
     );
     const defendingPlayer = randomPlayer(defendingTeam["team_players"], true);
 
-    attackingPlayer.deffense_capacity -= 23;
-    defendingPlayer.attack_capacity += 30;
-
     console.log(
       ` OPORTUNITY attackingPlayer - ${attackingPlayer.deffense_capacity} | defendingPlayer - ${defendingPlayer.name} | ${defendingPlayer.attack_capacity}`
     );
 
     if (
-      Math.trunc(defendingPlayer.attack_capacity) >
-      Math.trunc(attackingPlayer.deffense_capacity)
+      Math.trunc(attackingPlayer.attack_capacity) >
+      Math.trunc(defendingPlayer.deffense_capacity) &&
+    Math.trunc(attackingPlayer.speed_capacity) >
+      Math.trunc(defendingPlayer.speed_capacity) &&
+    Math.trunc(attackingPlayer.stamina) > Math.trunc(defendingPlayer.stamina)
     ) {
       console.log("GOAL BY AWAY TEAM");
       generateCommentary("goal", defendingPlayer, matchTime, team_deffending);
@@ -422,8 +424,22 @@ var functions = require("../../utils/functions");
       team_home_move = false;
       updateScore(team_home_move, team_away_move);
 
-      attackingPlayer.stamina -= 30;
-      defendingPlayer.stamina -= 13;
+      attackingPlayer.attack_capacity += 1;
+      defendingPlayer.deffense_capacity -= 1;
+
+      reduceValues(
+        2,
+        attackingTeam["team_players"],
+        "stamina",
+        ["deffender", "stricker", "midfielder"]
+      );
+  
+      reduceValues(
+        2,
+        defendingTeam["team_players"],
+        "stamina",
+        ["deffender", "stricker", "midfielder"]
+      );
 
       // Refactor these messages - use a  which passes in player, teamObject, color and icon name
       // console.log($(`#${attackingTeam.place}Events`).append(`<i class='fa fa-futbol-o' style='color:white;' aria-hidden='true'></i> ${matchTime} mins: ${attackingPlayer.name} scored<br/>`))
@@ -433,7 +449,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const handleDiscipline = (attackingTeam, defendingTeam, matchTime) => {
+const handleDiscipline = (attackingTeam, defendingTeam, matchTime) => {
   // Refactor
   // ATTACKING TEAM REDUNDANT
   // teamString can be substituted for defendingTeam.place
@@ -494,7 +510,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const handleInjury = (attackingTeam, matchTime) => {
+const handleInjury = (attackingTeam, matchTime) => {
   const attackingPlayer = randomPlayer(attackingTeam["team_players"], true);
   let team_attacking = attackingTeam.details;
   if (genRandomValue(101) % 40 === 0) {
@@ -520,7 +536,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const handleFreekick = (
+const handleFreekick = (
   attackingTeam,
   defendingTeam,
   matchTime,
@@ -538,13 +554,17 @@ var functions = require("../../utils/functions");
     defendingTeam["team_players"]
   );
 
-
-  if (defendingPlayer !== undefined && defendingPlayer.deffense_capacity !== undefined && attackingPlayer.attack_capacity > defendingPlayer.deffense_capacity) {
+  if (
+    defendingPlayer !== undefined &&
+    defendingPlayer.deffense_capacity !== undefined &&
+    attackingPlayer.attack_capacity > defendingPlayer.deffense_capacity &&
+    attackingPlayer.skills_capacity > defendingPlayer.skills_capacity && genRandomValue(2) % 2 === 0  ) {
     generateCommentary("freekick", attackingPlayer, matchTime, team_attacking);
     console.log(`${minute} mins: ${attackingPlayer.name} scored<br/>`);
     updateScore(team_home_move, team_away_move);
-    defendingPlayer.deffense_capacity -= 2;
-    attackingPlayer.attack_capacity += 5;
+    defendingPlayer.deffense_capacity -= 1;
+    attackingPlayer.attack_capacity += 1;
+    generateCommentary("goal", attackingPlayer, matchTime, team_attacking);
   } else {
     generateCommentary(
       "wastedFreekick",
@@ -552,7 +572,7 @@ var functions = require("../../utils/functions");
       matchTime,
       team_attacking
     );
-    attackingPlayer.skills_capacity -= 5;
+    attackingPlayer.skills_capacity -= 1;
     reduceValues(
       genRandomValue(3),
       attackingTeam["team_players"],
@@ -565,11 +585,11 @@ var functions = require("../../utils/functions");
       "skills_capacity",
       ["striker", "midfielder"]
     );
-    defendingPlayer.deffense_capacity += 3;
+    defendingPlayer.deffense_capacity += 1;
   }
 };
 
- const handlePenalty = (
+const handlePenalty = (
   attackingTeam,
   defendingTeam,
   matchTime,
@@ -601,16 +621,20 @@ var functions = require("../../utils/functions");
 
   if (attackingPlayer && attackingPlayer.attack_capacity != undefined) {
     if (
-      genRandomValue(attackingPlayer.attack_capacity) * 2 >
-      genRandomValue(defendingPlayer.deffense_capacity) +
-        genRandomValue(defendingPlayer.speed_capacity) +
-        genRandomValue(defendingPlayer.aggressivity_capacity)
+      Math.trunc(attackingPlayer.attack_capacity) >
+      Math.trunc(defendingPlayer.deffense_capacity) &&
+    Math.trunc(attackingPlayer.aggressivity_capacity) >
+      Math.trunc(defendingPlayer.aggressivity_capacity) &&
+    Math.trunc(attackingPlayer.stamina) > Math.trunc(defendingPlayer.stamina)
     ) {
       generateCommentary("penalty", attackingPlayer, matchTime, team_attacking);
-      //console.log(`${minute} mins: ${attackingPlayer.name} scores penalty<br/>`);
+      console.log(
+        `${minute} mins: ${attackingPlayer.name} scores penalty<br/>`
+      );
       updateScore(team_home_move, team_away_move);
       generateCommentary("goal", attackingPlayer, matchTime, team_attacking);
-      attackingPlayer.attack_capacity += 5;
+      attackingPlayer.attack_capacity += 1;
+      defendingPlayer.deffense_capacity -= 2;
     }
   } else {
     generateCommentary(
@@ -620,16 +644,19 @@ var functions = require("../../utils/functions");
       team_attacking
     );
     console.log(`${minute} mins: ${attackingPlayer.name} missed penalty<br/>`);
-    defendingPlayer.deffense_capacity += 15;
-    attackingPlayer.attack_capacity -= 10;
+    defendingPlayer.deffense_capacity += 2;
+    attackingPlayer.attack_capacity -= 2;
+    defendingPlayer.aggressivity_capacity += 1;
   }
+  defendingPlayer.stamina -= 1;
+  attackingPlayer.stamina -= 2;
 };
 
- const straightRed = (defendingTeam, matchTime) => {
+const straightRed = (defendingTeam, matchTime) => {
   let team_deffending = defendingTeam.details;
 
   const defendingPlayer = randomPlayer(defendingTeam["team_players"], false);
-  while(defendingPlayer.position === 'goalkeper'){
+  while (defendingPlayer.position === "goalkeper") {
     defendingPlayer = randomPlayer(defendingTeam["team_players"], false);
   }
   if (genRandomValue(defendingPlayer.aggressive) + (100 - matchTime) < 25) {
@@ -647,7 +674,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const updateScore = (team_home_move, team_away_move) => {
+const updateScore = (team_home_move, team_away_move) => {
   if (team_home_move) {
     score_home = score_home + 1;
     console.log(
@@ -661,7 +688,7 @@ var functions = require("../../utils/functions");
   }
 };
 
- const randomPosition = () => {
+const randomPosition = () => {
   const randomIndex = genRandomValue(positions.length) + 1;
   const chosenPosition = positions[randomIndex];
   return [chosenPosition];
