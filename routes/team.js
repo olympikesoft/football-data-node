@@ -9,6 +9,7 @@ const team = new TeamController();
 
 
 router.get('/manager/get/team', userMiddleware, verifyHasManager, (req, res, next) => team.getTeam(req, res, next));
+router.get('/get/list', userMiddleware, verifyHasManager, (req, res, next) => team.getTeams(req, res, next));
 router.post('/manager/create/team', userMiddleware, verifyHasManager, (req, res, next) =>  team.createTeam(req, res, next));
 
 module.exports = router;

@@ -45,7 +45,7 @@ class TransfersController {
     let market_id = parseInt(req.body.market_id);
     try {
       let teamUser = await TeamService.getTeamByUser(user_id);
-      
+
       let market = await TransferService.GetTransfersbyIdOnSale(market_id);
 
       let players_from_team = await PlayerService.getPlayersfromTeam(
@@ -54,9 +54,8 @@ class TransfersController {
 
       if (players_from_team.length > 0) {
         if (
-          players_from_team.filter(
-            (x) => x.player_id === market[0].player_id
-          ).length > 0
+          players_from_team.filter((x) => x.player_id === market[0].player_id)
+            .length > 0
         ) {
           return res
             .status(200)
@@ -104,7 +103,7 @@ class TransfersController {
         market[0].seller_team_id
       );
 
-      let insert_player = await PlayerService.InsertPlayerToTeam(
+      let insert_player = await PlayerService.insertPlayerToTeam(
         market[0].player_id,
         teamUser[0].id
       );
@@ -121,47 +120,5 @@ class TransfersController {
       }
     }
   }
-
-  /*
-  async GenerateSquad(req, res, next) {
-    let user_id = req.user.id;
-    let player_id = req.body.player_id;
-    let player_cost = req.body.player_cost;
-    try {
-      let manager = await _manager.getManagerbyUserId(user_id);
-
-      let team = await _team.getTeamByUserId(user_id);
-
-      if (!team) {
-        return res.status(400).json({ message: "No team finded" });
-      }
-
-      let players = await _player.getPlayersfromTeam(team[0].id);
-
-      if (players.length < 11) {
-      }
-
-      let checkPlayerTeam = players.filter((x) => x.id === parseInt(player_id));
-
-      if (checkPlayerTeam && checkPlayerTeam.length > 0) {
-        let sellPlayer = await SellerTeamPlayer(
-          team[0].id,
-          player_id,
-          player_cost
-        );
-        if (sellPlayer) {
-          return res.status(200).json({ success: true });
-        }
-      } else {
-        return res
-          .status(200)
-          .json({ message: "No money enough to buy the player." });
-      }
-    } catch (error) {
-      console.log(error);
-      Sentry.captureException(error);
-      return res.status(400).json({ message: "Error on system" });
-    }
-  }*/
 }
 module.exports = TransfersController;

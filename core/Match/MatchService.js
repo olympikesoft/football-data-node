@@ -1,10 +1,23 @@
 var knex = require("../../knex");
+var moment = require('moment');
 
 class MatchService {
-  async getMatchs() {
+  async getMatchsByTeamId(team_id) {
     let Matchs = [];
     try {
-      Matchs = await knex.from("matchs");
+      Matchs = await knex.from("matchs")
+      .select(["team.name as team_away_name", 
+      "team.image_url as team_away_image_url",
+      "team.id as team_away_id",
+      "team2.name as team_home_name", 
+      "team2.image_url as team_home_image_url",
+      "team2.id as team_home_id", 
+      "matchs.score_away", "matchs.score_home", "matchs.date_match", "matchs.hour_match"])
+      .where({ team_away_id: team_id })
+      .orWhere({team_home_id: team_id })
+      .leftJoin("team", "team.id", "matchs.team_away_id")
+      .leftJoin('team as team2', 'team2.id', 'matchs.team_home_id')
+      .orderBy('matchs.date_match');
     } catch (error) {
       console.log(error);
     }
@@ -60,10 +73,11 @@ class MatchService {
     situation
   ) {
     let hasCreated = false;
+    //let minutes_formated = moment().startOf('day').add(parseFloat(minute), "hours").format("mm:ss");
     try {
       await knex
         .from("match_report")
-        .insert({ minute, Player_id, match_id, team_id, comment, situation })
+        .insert({ minute: minute.toString(), Player_id, match_id, team_id, comment, situation })
         .then((res) => {
           if (res) {
             hasCreated = true;
@@ -85,12 +99,14 @@ class MatchService {
     match_id,
     team_id
   ) {
-    let points = 0;
-    if (rating > 6) {
-      points + 10;
-    } else {
-      points + 1;
-    }
+    console.log(red_cards,
+      goals,
+      injuries,
+      yellow_cards,
+      rating,
+      player_id,
+      match_id,
+      team_id)
     let hasCreated = false;
     try {
       await knex
@@ -100,7 +116,6 @@ class MatchService {
           goals: goals,
           injuries: injuries,
           yellow_cards: yellow_cards,
-          points: points,
           rating: rating,
           player_id: player_id,
           match_id: match_id,

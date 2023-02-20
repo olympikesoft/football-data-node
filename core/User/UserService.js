@@ -5,12 +5,10 @@ const jwt = require("jsonwebtoken");
 const moment = require("moment");
 
 class UserService {
-
   async existUser(email) {
     let existUser = false;
     try {
-      let user = await knex("user")
-        .where("user.email", email);
+      let user = await knex("user").where("user.email", email);
       if (user.length > 0) {
         existUser = true;
       }
@@ -25,7 +23,6 @@ class UserService {
     try {
       const hashedPassword = await functions.hashPassword(password);
       let form = {
-        facebook_id: "no",
         IsValid: "y",
         email,
         name,
@@ -55,19 +52,28 @@ class UserService {
   }
 
   async login(email, password) {
-    let token = {};
+    let token = { token: null, id: 0 };
     try {
       const hashedPassword = await functions.hashPassword(password);
       let user = await knex("user")
         .select(["user.id", "user.password", "user.email"])
-        .where("user.email", email)
-      await functions.comparePassword(password, hashedPassword).then((isMatch) => {
+        .where("user.email", email);
+      await functions
+        .comparePassword(password, hashedPassword)
+        .then((isMatch) => {
           if (isMatch) {
-            token = jwt.sign({ id: user[0].id }, process.env.secret, {
-              expiresIn: 86400,
-            });
+            token = {
+              token: jwt.sign(
+                { id: user[0].id, name: user[0].name, email: user[0].email },
+                process.env.secret,
+                {
+                  expiresIn: 86400,
+                }
+              ),
+              id: user[0].id,
+            };
           }
-    });
+        });
     } catch (error) {
       console.log(error);
     }
@@ -79,10 +85,10 @@ class UserService {
     let userdata = null;
     try {
       user = await knex("user")
-        .select("user.Id", "user.name", "user.Email")
+        .select("user.Id", "user.name", "user.email", "user.money_game")
         .where("user.Id", "=", user_id);
       if (user.length > 0) {
-        userdata = { id: user[0].Id, name: user[0].name, Email: user[0].Email };
+        userdata = { user };
       }
     } catch (error) {
       console.log(error);
@@ -92,17 +98,17 @@ class UserService {
 
   async updateUser(user_id, object) {
     let isUpdated = false;
-      await knex("user")
-        .where("id", user_id)
-        .update(object)
-        .then((res) => {
-          if (res) {
-            isUpdated = true;
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    await knex("user")
+      .where("id", user_id)
+      .update(object)
+      .then((res) => {
+        if (res) {
+          isUpdated = true;
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     return isUpdated;
   }
 

@@ -2,6 +2,8 @@ var UserService = require("../User/UserService");
 var UserService = new UserService();
 var ManagerService = require("../Manager/ManagerService");
 var ManagerService = new ManagerService();
+var TeamService = require("../Team/TeamService");
+var TeamService = new TeamService();
 const jwt = require("jsonwebtoken");
 
 class UserController {
@@ -14,8 +16,15 @@ class UserController {
       let existUser = await UserService.existUser(email);
       if (existUser) {
         const users = await UserService.login(email, password);
-        if (Object.keys(users).length > 0) {
-          return res.status(200).json({ user: users });
+        if (users.id > 0) {
+          let path = "/create-team"; // create-team
+
+          let checkTeam = await TeamService.getTeamByUser(users.id);
+          if (checkTeam.length > 0) {
+            path = "/lineup-team";
+          }
+
+          return res.status(200).json({ user: users, path: path });
         } else {
           return res.status(400).json({ message: "error authentication" });
         }
@@ -24,7 +33,8 @@ class UserController {
       }
     } catch (error) {
       if (error) {
-        next(error)
+        //next(error)
+        console.log('error', error);
       }
     }
   }

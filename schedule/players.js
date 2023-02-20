@@ -50,6 +50,6 @@ module.exports = () => {
       price_stars,
       moral
     );
-    await PlayerService.InsertPlayerToTeam(playerId, null, 1);
+    await PlayerService.insertPlayerToTeam(playerId, null, 1);
   });
 };

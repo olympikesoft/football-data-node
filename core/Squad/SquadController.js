@@ -17,7 +17,7 @@ class SquadController {
       goalkeeper: [],
       deffender: [],
       middlefield: [],
-      strickers: [],
+      stricker: [],
     };
 
     let errors = {
@@ -129,7 +129,7 @@ class SquadController {
               obj.IsPlaying = 0;
             }
             obj.player = players_attack[index];
-            squad.strickers.push(obj);
+            squad.stricker.push(obj);
           }
         }
 
@@ -160,12 +160,12 @@ class SquadController {
           );
         }
 
-        for (let k = 0; k < squad.strickers.length; k++) {
+        for (let k = 0; k < squad.stricker.length; k++) {
           let define_strickers = await SquadService.generateSquad(
             team[0].id,
-            squad.strickers[k].player.id,
-            squad.strickers[k].player.position_id,
-            squad.strickers[k].IsPlaying
+            squad.stricker[k].player.id,
+            squad.stricker[k].player.position_id,
+            squad.stricker[k].IsPlaying
           );
         }
 
@@ -184,7 +184,7 @@ class SquadController {
       goalkeeper: [],
       deffender: [],
       middlefield: [],
-      strickers: [],
+      stricker: [],
     };
 
     let errors = {
@@ -296,7 +296,7 @@ class SquadController {
               obj.IsPlaying = 0;
             }
             obj.player = players_attack[index];
-            squad.strickers.push(obj);
+            squad.stricker.push(obj);
           }
         }
         return res.status(200).json({ squad: squad });

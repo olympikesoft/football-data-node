@@ -51,62 +51,114 @@ module.exports = () => {
       matchObject.match.team_home.team_players = teamSquadHome;
 
       let simulate = await actions.matchSimulator(matchObject, true);
+      let teamScores = {
+        [teamHome[0].id]: 0,
+        [teamAway[0].id]: 0,
+      };
 
-      let data = JSON.stringify(matchObject.match);
+      const events = matchObject.match.match_summary.events;
+      const goalsAccumulator = {};
+      for (const event of events) {
+        if (event.situation === "goal") {
+          const scorer = event.player.id;
+          if (goalsAccumulator[scorer]) {
+            goalsAccumulator[scorer]++;
+          } else {
+            goalsAccumulator[scorer] = 1;
+          }
+          if (event.team[0].id === teamAway[0].id) {
+            teamScores[teamAway[0].id] += 1;
+          }
+          if (event.team[0].id === teamHome[0].id) {
+            if (event.situation === "goal") {
+              teamScores[teamHome[0].id] += 1;
+            }
+          }
+        }
+      }
 
-      let scoreHome = matchObject.match.match_summary.events.filter(
-        (el) => el.situation === "goal" && el.team.id === teamHome.id
-      ).length;
-      let scoreAway = matchObject.match.match_summary.events.filter(
-        (el) => el.situation === "goal" && el.team.id === teamAway.id
-      ).length;
-
-      let updateMatch = await MatchService.updateMatchResultById(
+      await MatchService.updateMatchResultById(
         match.id,
-        scoreHome,
-        scoreAway
+        teamScores[teamHome[0].id],
+        teamScores[teamAway[0].id]
       );
 
-      for (let j = 0; j < matchObject.match.match_summary.events.length; j++) {
-        let event = matchObject.match.match_summary.events[j];
+      for (let j = 0; j < events.length; j++) {
+        let event = events[j];
         await MatchService.createMatchReport(
           event.minute,
           event.player.id,
           match.id,
-          event.team.id,
+          event.team[0].id,
           event.event,
           event.situation
         );
       }
 
-      let teamAwayEvents = matchObject.match.match_summary.events.filter( el => el.team.id === teamAway.id && el.situation === 'goal');
-
-      for (let j = 0; j < teamAwayEvents.length; j++) {
-        let playerEvents = teamAwayEvents[j].filter(el => el.player.id);
+      for (let index = 0; index < teamSquadHome.length; index++) {
+        const playerId = teamSquadAway[index].id;
+        const goals =
+          goalsAccumulator && goalsAccumulator[playerId]
+            ? goalsAccumulator[playerId]
+            : 0;
+        let rating = 0;
+        if (goals === 0) {
+          rating = 6;
+        }
+        if (goals === 1 && goalsAccumulator[teamAway] === goals) {
+          rating == 9;
+        } else {
+          if (goals === 1) {
+            rating = 7;
+          }
+          if (goals > 1) {
+            rating = 9;
+          }
+        }
         await MatchService.createMatchPlayerReport(
           0,
-          player_events_away[j].goals_scored,
+          goals,
           0,
-          player_events_away[j].yellow_card,
-          player_events_away[j].rating,
+          0,
+          rating,
+          playerId,
           match.id,
-          matches_details[0].away_team_id
+          teamAway[0].id
         );
       }
 
-      /*for (let j = 0; j < player_events_home.length; j++) {
-        await MatchService.CreateMatchPlayerReport(
-          player_events_home[j].red_card,
-          player_events_home[j].goals_scored,
+      for (let index = 0; index < teamSquadAway.length; index++) {
+        const playerId = teamSquadAway[index].id;
+        const goals =
+          goalsAccumulator && goalsAccumulator[playerId]
+            ? goalsAccumulator[playerId]
+            : 0;
+        let rating = 0;
+        if (goals === 0) {
+          rating = 6;
+        }
+        if (goals === 1 && goalsAccumulator[teamAway] === goals) {
+          rating == 9;
+        } else {
+          if (goals === 1) {
+            rating = 7;
+          }
+          if (goals > 1) {
+            rating = 9;
+          }
+        }
+
+        await MatchService.createMatchPlayerReport(
           0,
-          player_events_home[j].yellow_card,
-          player_events_home[j].rating,
-          parseInt(player_events_home[j].id),
-          value.match_summary[0].id,
-          matches_details[0].home_team_id
+          goals,
+          0,
+          0,
+          rating,
+          playerId,
+          match.id,
+          teamAway[0].id
         );
-      }*/
-      fs.writeFile("data.json", data);
+      }
 
       matchObject = null;
     }

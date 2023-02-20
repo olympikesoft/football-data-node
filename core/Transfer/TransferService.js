@@ -146,7 +146,6 @@ class TransferService {
 
   async GetTransfersbyIdOnSale(id) {
     let market = [];
-
     try {
       let q = await knex
         .select([
@@ -165,10 +164,6 @@ class TransferService {
             "team.id"
           );
         });
-      // .toSQL();
-
-      console.log(q);
-
       if (q) {
         market = q;
       }

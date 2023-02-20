@@ -132,7 +132,7 @@ const matchSimulator = (matches, play) => {
             home_team.team_players
           );
           match_summary.events = actions.getEvents();
-        /*} else if (eventValue > 50 && eventValue <= 55) {
+          /*} else if (eventValue > 50 && eventValue <= 55) {
           console.log("redcard");
           actions.straightRed(defendingTeam, matchTime);
           actions.increaseValues(
@@ -182,7 +182,7 @@ const matchSimulator = (matches, play) => {
             home_team.team_players
           );
           match_summary.events = actions.getEvents();
-        /*} else if (eventValue > 0 && eventValue <= 20) {
+          /*} else if (eventValue > 0 && eventValue <= 20) {
           console.log("handleDiscipline");
           actions.handleDiscipline(attackingTeam, defendingTeam, matchTime);
           actions.increaseValues(

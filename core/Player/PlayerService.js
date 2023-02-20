@@ -84,6 +84,35 @@ class PlayerService {
     return players;
   }
 
+  async getPlayersfromTeamAndPosition(team_id, position){
+    let players = [];
+    try {
+      let q = await knex
+        .select([
+          "player.*",
+          "position.name as position_name",
+          "country.name as country_name",
+          "player.id as player_id",
+        ])
+        .from("team_has_player")
+        .where("team.id", team_id)
+        .where('position.name', position)
+        .leftJoin("player", "player.id", "team_has_player.Player_id")
+        .leftJoin("team", "team.id", "team_has_player.team_id")
+        .leftJoin("manager", "manager.id", "team.manager_id")
+        .leftJoin("position", "position.id", "player.Position_id")
+        .leftJoin("country", "country.id", "player.Country_id");
+      if (q != undefined) {
+        for (let index = 0; index < q.length; index++) {
+          players.push(q[index]);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return players;
+  }
+
   async SelectPlayerstoTeam(obj) {
     let inserted = false;
     try {
@@ -494,7 +523,7 @@ async GetPlayerPrice(player_id){
     return players_reports;
   }
 
-  async InsertPlayerToTeam(player_id, team_id) {
+  async insertPlayerToTeam(player_id, team_id) {
     let isAddPlayer = true;
     try {
       let obj = {

@@ -445,6 +445,24 @@ const goalChance = (
       // console.log($(`#${attackingTeam.place}Events`).append(`<i class='fa fa-futbol-o' style='color:white;' aria-hidden='true'></i> ${matchTime} mins: ${attackingPlayer.name} scored<br/>`))
 
       console.log(`${matchTime} mins: ${defendingPlayer.name} scored<br/>`);
+    }else{
+
+      reduceValues(
+        1,
+        attackingTeam["team_players"],
+        "attack_capacity",
+        ["deffender", "stricker", "midfielder"]
+      );
+  
+      increaseValues(
+        1,
+        defendingTeam["team_players"],
+        "deffense_capacity",
+        ["deffender", "stricker", "midfielder"]
+      );
+
+      generateCommentary("chance", defendingPlayer, matchTime, team_deffending);
+
     }
   }
 };

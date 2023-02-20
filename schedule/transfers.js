@@ -13,7 +13,7 @@ module.exports = () => {
       const element = players[index];
       let checkPlayer = await PlayerService.checkPlayerHaveTeam(element.id);
       if (!checkPlayer) {
-        await PlayerService.InsertPlayerToTeam(element.id, null, 1);
+        await PlayerService.insertPlayerToTeam(element.id, null, 1);
         await TransferService.SellerTeamPlayer(
           1,
           element.id,

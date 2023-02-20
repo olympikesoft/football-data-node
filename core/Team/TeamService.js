@@ -11,6 +11,16 @@ class TeamService {
     return team;
   }
 
+  async getTeamsExceptUserTeam(team_id){
+    let teams = null;
+    try {
+      teams = await knex.from("team").whereNot("team.id", team_id);
+    } catch (error) {
+      console.log("error", error);
+    }
+    return teams;
+  }
+
   async getTeam(name) {
     let team = null;
     try {
@@ -21,7 +31,7 @@ class TeamService {
     return team;
   }
 
-  async createTeam(name, manager_id, description, formationId){
+  async createTeam(name, manager_id, description, formationId, image_url){
     let teamCreated = null;
     try {
       await knex("team")
@@ -45,70 +55,15 @@ class TeamService {
     return teamCreated;
   }
 
-  /*
-  async CreateTeamAutomatic(
-    name,
-    image_url,
-    league_id,
-    team_image_id,
-    equipment_home_url,
-    equipment_away_url
-  ) {
-    let teamCreated = null;
-    try {
-      await knex("team")
-        .insert({
-          name: name,
-          image_url: image_url,
-          league_id: league_id,
-          team_image_id: team_image_id,
-          equipment_away_url: equipment_away_url,
-          equipment_home_url: equipment_home_url,
-        })
-        .then((result) => {
-          if (result) {
-            teamCreated = result[0];
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } catch (error) {
-      console.log(error);
-      Sentry.captureException(error);
-    }
-    return teamCreated;
-  }*/
-
   async getTeamByUser(user_id) {
     let team = [];
     try {
       team = await knex
-        .select(["team.*", "team_image.name_url as image_path"])
+        .select(["team.*"])
         .from("team")
         .where("manager.user_id", user_id)
         .leftJoin("manager", "manager.id", "team.manager_id")
         .leftJoin("user", "user.id", "manager.user_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id")
-    } catch (error) {
-      console.log(error);
-    }
-    return team;
-  }
-
-  async getTeamByUserAndSeason(user_id, season_id) {
-    let team = [];
-    try {
-      team = await knex
-        .select(["team.*", "team_image.name_url as image_path"])
-        .from("team")
-        .where("manager.user_id", user_id)
-        .where("manager.season_id", season_id)
-        .leftJoin("manager", "manager.id", "team.manager_id")
-        .leftJoin("user", "user.id", "manager.user_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id")
-        .leftJoin("league", "league.IdLeague", "team.league_id")
-        .leftJoin("season", "season.id", "manager.season_id");
     } catch (error) {
       console.log(error);
     }
@@ -124,83 +79,12 @@ class TeamService {
         .where("team.id", team_id)
         .leftJoin("manager", "manager.id", "team.manager_id")
         .leftJoin("user", "user.id", "manager.user_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id");
     } catch (error) {
       console.log(error);
     }
     return user;
   }
   
-  /*
-  async getTeamsByLeague(league_id) {
-    let teams = null;
-    try {
-      teams = await knex
-        .select("team.name", "team.id", "team_image.name_url")
-        .from("team")
-        .where("team.league_id", league_id)
-        .leftJoin("league", "league.idLeague", "team.league_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id");
-    } catch (error) {
-      console.log(error);
-      Sentry.captureException(error);
-    }
-    return teams;
-  }
-  */
-
-  async getTeamsNotSelectedByLeague(league_id) {
-    let teams = null;
-    try {
-      teams = await knex
-        .select("team.name", "team.id", "team_image.name_url")
-        .from("team")
-        .where("team.league_id", league_id)
-        .whereNull("team.manager_id")
-        .leftJoin("league", "league.idLeague", "team.league_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id");
-    } catch (error) {
-      console.log(error);
-    }
-    return teams;
-  }
-
-  /*
-
-  async getTeams() {
-    let teams = null;
-    try {
-      teams = await knex
-        .select("team.name", "team.id", "team_image.name_url")
-        .from("team")
-        .leftJoin("league", "league.idLeague", "team.league_id")
-        .leftJoin("team_image", "team_image.id", "team.team_image_id");
-    } catch (error) {
-      console.log(error);
-      Sentry.captureException(error);
-    }
-    return teams;
-  }
-
-  async CreateTeam(form) {
-    let teamCreated = null;
-    try {
-      await knex("team")
-        .insert(form)
-        .then((result) => {
-          if (result) {
-            teamCreated = true;
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    } catch (error) {
-      console.log(error);
-      Sentry.captureException(error);
-    }
-    return teamCreated;
-  }
 
   async updateTeam(id, object) {
     let isUpdated = false;
