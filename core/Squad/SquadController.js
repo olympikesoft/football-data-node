@@ -10,6 +10,11 @@ var SquadService = new SquadService();
 var PlayerService = require("../Player/PlayerService");
 var PlayerService = new PlayerService();
 
+var MatchService = require("../Match/MatchService");
+var MatchService = new MatchService();
+
+const moment = require("moment");
+
 class SquadController {
   async generateSquad(req, res, next) {
     let user_id = req.user.id;
@@ -187,13 +192,6 @@ class SquadController {
       stricker: [],
     };
 
-    let errors = {
-      goalkeeperMissing: false,
-      deffenderMissing: false,
-      middlefieldMissing: false,
-      strickersMissing: false,
-    };
-
     try {
       let team = await TeamService.getTeamByUser(user_id);
       if (!team) {
@@ -213,11 +211,20 @@ class SquadController {
         });
       }
 
-      let checkHasSquad = await SquadService.getSquadDefined(team[0].id);
+      // get id of current match
+      let match = await MatchService.getUpCommingMatches(team[0].id);
+      console.log(match.length);
+      if (match.length === 0) {
+        return res.status(400).json({
+          message:
+            "No match upcomming",
+        });
+      }
 
-      if (checkHasSquad.length > 0) {
+      let squadTeam = await SquadService.getSquadDefinedWithMatch(team[0].id, match[0].id);
+      if (squadTeam.length > 0) {
         return res.status(200).json({
-          squad: checkHasSquad
+          squad: squadTeam
             .sort((a, b) => a.position_id - b.position_id)
             .filter(function (el, i, c) {
               return i == c.indexOf(el);
@@ -225,81 +232,69 @@ class SquadController {
           formation: "4-4-2",
         });
       } else {
-        let players_goalkeeper =
-          await PlayerService.getPlayersManagerAndPosition(
-            "goalkeeper",
-            user_id
-          );
+        return res.status(404).json({
+          message: "No squad Defined",
+        });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
 
-        if (players_goalkeeper.length > 0) {
-          for (let index = 0; index < players_goalkeeper.length; index++) {
-            let obj = {};
-            if (index === 0) {
-              obj.IsPlaying = 1;
-            } else {
-              obj.IsPlaying = 0;
-            }
-            obj.player = players_goalkeeper[index];
-            squad.goalkeeper.push(obj);
-          }
-        } else {
-          errors.goalkeeperMissing = true;
-        }
+  async addPlayerSquadMatch(req, res, next) {
+    let user_id = req.user.id;
+    let matchId = req.body.matchId;
+    let playerId = req.body.playerId;
 
-        let players_defender = await PlayerService.getPlayersManagerAndPosition(
-          "defender",
-          user_id
+    try {
+      let team = await TeamService.getTeamByUser(user_id);
+      if (!team) {
+        return res.status(400).json({ message: "No team find" });
+      }
+
+      let match = await MatchService.getMatch(matchId);
+
+      if (!match) {
+        return res
+          .status(400)
+          .json({ message: "No match find", success: false });
+      }
+
+      // check player if already on squad
+
+      let isPlayerSquad = await SquadService.playerIsMatchSquad(
+        matchId,
+        playerId
+      );
+
+      if (isPlayerSquad) {
+        return res.status(501).json({
+          message: "Player already on squad",
+          success: false,
+        });
+      }
+
+      const oneHourBeforeMatchDatetime = moment(match.matchdatetime).subtract(
+        1,
+        "hour"
+      );
+      if (moment().isBefore(oneHourBeforeMatchDatetime)) {
+        const player = await PlayerService.getPlayersbyId(playerId);
+        await SquadService.addSquad(
+          match.id,
+          team[0].id,
+          playerId,
+          player.Position_id,
+          0
         );
-
-        if (players_defender.length > 0) {
-          for (let index = 0; index < players_defender.length; index++) {
-            let obj = {};
-            if (index < 4) {
-              obj.IsPlaying = 1;
-            } else {
-              obj.IsPlaying = 0;
-            }
-            obj.player = players_defender[index];
-            squad.deffender.push(obj);
-          }
-        }
-
-        let players_middle = await PlayerService.getPlayersManagerAndPosition(
-          "midfielder",
-          user_id
-        );
-
-        if (players_middle.length > 0) {
-          for (let index = 0; index < players_middle.length; index++) {
-            let obj = {};
-            if (index < 4) {
-              obj.IsPlaying = 1;
-            } else {
-              obj.IsPlaying = 0;
-            }
-            obj.player = players_middle[index];
-            squad.middlefield.push(obj);
-          }
-        }
-
-        let players_attack = await PlayerService.getPlayersManagerAndPosition(
-          "striker",
-          user_id
-        );
-
-        if (players_attack.length > 0) {
-          for (let index = 0; index < players_attack.length; index++) {
-            let obj = {};
-            if (index < 2) {
-              obj.IsPlaying = 1;
-            } else {
-              obj.IsPlaying = 0;
-            }
-            obj.player = players_attack[index];
-            squad.stricker.push(obj);
-          }
-        }
-        return res.status(200).json({ squad: squad });
+        return res.status(200).json({ message: "Added player", success: true });
+      } else {
+        return res.status(501).json({
+          message: "No allowed to add to the next Game",
+          success: false,
+        });
       }
     } catch (err) {
       if (err) {

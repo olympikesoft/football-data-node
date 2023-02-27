@@ -16,6 +16,9 @@ var TeamService = new TeamService();
 var MatchService = require("../Match/MatchService");
 var MatchService = new MatchService();
 
+var LeagueService = require("../League/LeagueService");
+var LeagueService = new LeagueService();
+
 class TeamController {
   async getTeam(req, res, next) {
     let userId = req.user.id;
@@ -25,6 +28,57 @@ class TeamController {
         return res.status(404).json({ Message: "No team" });
       }
       return res.status(200).json({ team: team });
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
+
+  async linkTeamLeague(req, res, next) {
+    const userId = req.user.id;
+    const leagueId = req.body.leagueId;
+
+    try {
+      let checkTeam = await TeamService.getTeamByUser(userId);
+
+      if (checkTeam.length === 0) {
+        throw new Error("Dont have team, please create!");
+      }
+
+      let league = await LeagueService.getLeagueById(leagueId);
+
+      if (league.length === 0) {
+        throw new Error("League not exist!");
+      }
+
+      if (league[0].active > 1) {
+        throw new Error("League closed!");
+      }
+
+      if (league[0].teams_reached === league[0].teams_limit) {
+        throw new Error("League closed!");
+      }
+
+      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(
+        checkTeam[0].id,
+        leagueId
+      );
+
+      if (checkExistAlreadyOnLeague.length > 0) {
+        throw new Error("Team already linked with League.");
+      }
+
+      await LeagueService.addTeamLeague(checkTeam[0].id, leagueId);
+      let teamsLeague = league[0].teams_reached + 1;
+      await LeagueService.updateLeague(
+        leagueId,
+        teamsLeague,
+        teamsLeague === league[0].teams_limit ? 2 : 1
+      );
+      return res
+        .status(200)
+        .json({ message: "Team link to League", success: true });
     } catch (err) {
       if (err) {
         next(err);
@@ -91,41 +145,59 @@ class TeamController {
 
         teams[index]["percentage_win"] = (wins.length / matches.length) * 100;
 
-        let playersGoalKeeper = await PlayerService.getPlayersfromTeamAndPosition(teamEl.id, 'goalkeeper');
-        let playersDeffenders = await PlayerService.getPlayersfromTeamAndPosition(teamEl.id, 'defender');
-        let playersMiddlefield = await PlayerService.getPlayersfromTeamAndPosition(teamEl.id, 'midfielder');
-        let playersStrickers = await PlayerService.getPlayersfromTeamAndPosition(teamEl.id, 'striker');
+        let playersGoalKeeper =
+          await PlayerService.getPlayersfromTeamAndPosition(
+            teamEl.id,
+            "goalkeeper"
+          );
+        let playersDeffenders =
+          await PlayerService.getPlayersfromTeamAndPosition(
+            teamEl.id,
+            "defender"
+          );
+        let playersMiddlefield =
+          await PlayerService.getPlayersfromTeamAndPosition(
+            teamEl.id,
+            "midfielder"
+          );
+        let playersStrickers =
+          await PlayerService.getPlayersfromTeamAndPosition(
+            teamEl.id,
+            "striker"
+          );
 
-        let goalKeeperOveral =  playersGoalKeeper.reduce(
-          (sum, record) =>
-            sum + record.goalkeeper_capacity,
+        let goalKeeperOveral = playersGoalKeeper.reduce(
+          (sum, record) => sum + record.goalkeeper_capacity,
           0
         );
 
-        teams[index]["goalkeeperOveral"] =  Math.floor((goalKeeperOveral / playersGoalKeeper.length));
+        teams[index]["goalkeeperOveral"] = Math.floor(
+          goalKeeperOveral / playersGoalKeeper.length
+        );
 
         let deffenseOveral = playersDeffenders.reduce(
-          (sum, record) =>
-            sum + record.deffense_capacity,
+          (sum, record) => sum + record.deffense_capacity,
           0
         );
-        teams[index]["deffenseOveral"] = Math.floor((deffenseOveral / playersDeffenders.length));
+        teams[index]["deffenseOveral"] = Math.floor(
+          deffenseOveral / playersDeffenders.length
+        );
 
-        
         let MiddleOveral = playersMiddlefield.reduce(
-          (sum, record) =>
-            sum + record.middle_capacity,
+          (sum, record) => sum + record.middle_capacity,
           0
         );
-        teams[index]["MiddleOveral"] = Math.floor((MiddleOveral / playersMiddlefield.length));
+        teams[index]["MiddleOveral"] = Math.floor(
+          MiddleOveral / playersMiddlefield.length
+        );
 
         let StrickerOveral = playersStrickers.reduce(
-          (sum, record) =>
-            sum + record.attack_capacity,
+          (sum, record) => sum + record.attack_capacity,
           0
         );
-        teams[index]["StrickerOveral"] = Math.floor((StrickerOveral / playersStrickers.length));
-
+        teams[index]["StrickerOveral"] = Math.floor(
+          StrickerOveral / playersStrickers.length
+        );
       }
       return res.status(200).json({ teams: teams });
     } catch (err) {
@@ -140,6 +212,7 @@ class TeamController {
     const userId = req.user.id;
     const description = req.body.description;
     const formationId = req.body.formationId;
+    const leagueId = req.body.leagueId;
     const image = req.body.image;
     const image_url = new Buffer.from(image, "binary").toString("base64");
 
@@ -180,8 +253,11 @@ class TeamController {
         manager.id,
         description,
         formationId,
-        image_url
+        image_url,
+        leagueId
       );
+
+      //      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(newTeam, leagueId);
 
       // if teamCreated create random players base on formation
       if (newTeam) {

@@ -1,23 +1,29 @@
 var knex = require("../../knex");
-var moment = require('moment');
+var moment = require("moment");
 
 class MatchService {
   async getMatchsByTeamId(team_id) {
     let Matchs = [];
     try {
-      Matchs = await knex.from("matchs")
-      .select(["team.name as team_away_name", 
-      "team.image_url as team_away_image_url",
-      "team.id as team_away_id",
-      "team2.name as team_home_name", 
-      "team2.image_url as team_home_image_url",
-      "team2.id as team_home_id", 
-      "matchs.score_away", "matchs.score_home", "matchs.date_match", "matchs.hour_match"])
-      .where({ team_away_id: team_id })
-      .orWhere({team_home_id: team_id })
-      .leftJoin("team", "team.id", "matchs.team_away_id")
-      .leftJoin('team as team2', 'team2.id', 'matchs.team_home_id')
-      .orderBy('matchs.date_match');
+      Matchs = await knex
+        .from("matchs")
+        .select([
+          "team.name as team_away_name",
+          "team.image_url as team_away_image_url",
+          "team.id as team_away_id",
+          "team2.name as team_home_name",
+          "team2.image_url as team_home_image_url",
+          "team2.id as team_home_id",
+          "matchs.score_away",
+          "matchs.score_home",
+          "matchs.date_match",
+          "matchs.hour_match",
+        ])
+        .where({ team_away_id: team_id })
+        .orWhere({ team_home_id: team_id })
+        .leftJoin("team", "team.id", "matchs.team_away_id")
+        .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
+        .orderBy("matchs.date_match");
     } catch (error) {
       console.log(error);
     }
@@ -50,10 +56,56 @@ class MatchService {
     return isCreated;
   }
 
+  async getUpCommingMatches(team_id){
+    let matches = [];
+    try {
+      await knex
+      .select("matchs.id")
+        .from("matchs")
+        .where(function() {
+          this.where({ team_away_id: team_id })
+            .orWhere({ team_home_id: team_id });
+        })
+          .where('matchs.matchdatetime', '>=', knex.raw('NOW()'))
+          .where(knex.raw('DATE(matchs.matchdatetime)'), '>=', knex.raw('CURDATE()'))
+          .where(knex.raw('TIME(matchs.matchdatetime)'), '>=', knex.raw('CURTIME()'))
+          .where("matchs.status", 0)
+          .leftJoin("team", "team.id", "matchs.team_away_id")
+          .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
+        .orderBy('matchs.matchdatetime', 'asc')
+        .then((res) => {
+          if (res) {
+            matches = res;
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return matches;
+  }
+
   async getMatch(id) {
     let match = null;
     try {
-      let q = await knex.from("matchs").where("id", id);
+      let q = await knex
+        .from("matchs")
+        .select([
+          "team.name as team_away_name",
+          "team.image_url as team_away_image_url",
+          "team.id as team_away_id",
+          "team2.name as team_home_name",
+          "team2.image_url as team_home_image_url",
+          "team2.id as team_home_id",
+          "matchs.score_away",
+          "matchs.score_home",
+          "matchs.date_match",
+          "matchs.hour_match",
+          "matchs.id as id",
+          "matchs.matchdatetime"
+        ])
+        .leftJoin("team", "team.id", "matchs.team_away_id")
+        .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
+        .where("matchs.id", id);
 
       if (q) {
         match = q[0];
@@ -62,6 +114,24 @@ class MatchService {
       console.log(error);
     }
     return match;
+  }
+
+  async getMatchReport(match_id) {
+    let matchSummary = [];
+    try {
+      await knex
+        .from("match_report")
+        .where("match_id", match_id)
+        .orderBy("match_report.minute", "desc")
+        .then((res) => {
+          if (res) {
+            matchSummary = res;
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return matchSummary;
   }
 
   async createMatchReport(
@@ -77,7 +147,14 @@ class MatchService {
     try {
       await knex
         .from("match_report")
-        .insert({ minute: minute.toString(), Player_id, match_id, team_id, comment, situation })
+        .insert({
+          minute: minute.toString(),
+          Player_id,
+          match_id,
+          team_id,
+          comment,
+          situation,
+        })
         .then((res) => {
           if (res) {
             hasCreated = true;
@@ -99,14 +176,6 @@ class MatchService {
     match_id,
     team_id
   ) {
-    console.log(red_cards,
-      goals,
-      injuries,
-      yellow_cards,
-      rating,
-      player_id,
-      match_id,
-      team_id)
     let hasCreated = false;
     try {
       await knex

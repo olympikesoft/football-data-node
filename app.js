@@ -13,8 +13,7 @@ var knex = require("./knex");
 
 //require('./schedule/players')();
 //require('./schedule/transfers')();
-require('./schedule/matches')();
-
+//require('./schedule/matches')();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -26,6 +25,8 @@ var playerRouter = require('./routes/player');
 var squadRouter = require('./routes/squad');
 var matchInviteRouter = require('./routes/matchinvite');
 var transactionRouter = require('./routes/transactions');
+var rankingRouter = require('./routes/ranking');
+var leagueRouter = require('./routes/league');
 
 const port = 9000;
 
@@ -143,5 +144,7 @@ app.use('/api/player', playerRouter);
 app.use('/api/squad', squadRouter);
 app.use('/api/match-invite', matchInviteRouter);
 app.use('/api/transaction', transactionRouter);
+app.use('/api/ranking', rankingRouter);
+app.use('/api/league', leagueRouter);
 
 module.exports = app;

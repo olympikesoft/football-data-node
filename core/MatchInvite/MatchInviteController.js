@@ -37,6 +37,7 @@ class MatchInviteController {
                   status: t.status === 1 ? 'Pending': 'Approved',
                   invited: t.user_one_id === team[0].id ? 'Sended' : 'Received',
                   id: t.id,
+                  date: t.created_at,
                 }
               : {
                   teamId: t.team_away_id,
@@ -45,6 +46,7 @@ class MatchInviteController {
                   status: t.status === 1 ? 'Pending': 'Approved',
                   invited: t.user_one_id === team[0].id ? 'Sended' : 'Received',
                   id: t.id,
+                  date: t.created_at
                 };
           return teamDisplay;
         });
