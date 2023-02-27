@@ -121,6 +121,23 @@ class LeagueService {
     }
     return teamLeagues;
   }
+
+  async getTeamLeaguesByLeague(league_id){
+    let teamLeagues = [];
+    try {
+      teamLeagues = await knex
+        .select([
+          "team.*",
+        ])
+        .from("team_has_league")
+        .where('team_has_league.league_id', league_id)
+        .leftJoin("team", "team.id", "team_has_league.team_id")
+        .leftJoin("league", "team.id", "team_has_league.league_id")
+    } catch (error) {
+      console.log(error);
+    }
+    return teamLeagues;
+  }
 }
 
 module.exports = LeagueService;

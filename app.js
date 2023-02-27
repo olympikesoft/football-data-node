@@ -13,7 +13,8 @@ var knex = require("./knex");
 
 //require('./schedule/players')();
 //require('./schedule/transfers')();
-//require('./schedule/matches')();
+require('./schedule/matches')();
+require('./schedule/league')();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');

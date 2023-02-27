@@ -30,14 +30,14 @@ class MatchService {
     return Matchs;
   }
 
-  async createMatch(team_away_id, team_home_id, hour_match, date_match) {
+  async createMatch(team_away_id, team_home_id, league_id, date) {
     let isCreated = null;
     try {
       let obj = {
         team_away_id,
         team_home_id,
-        hour_match,
-        date_match,
+        date,
+        league_id,
       };
       await knex
         .from("matchs")
@@ -223,7 +223,7 @@ class MatchService {
   async getMatchNotPlayed() {
     let match = null;
     try {
-      let q = await knex.from("matchs").where("status", 0);
+      let q = await knex.from("matchs").where("status", 1);
       if (q) {
         match = q;
       }
