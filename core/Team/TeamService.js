@@ -39,7 +39,8 @@ class TeamService {
           name,
           manager_id,
           description,
-          formationId
+          formationId,
+          image_url
         })
         .then((result) => {
           if (result) {

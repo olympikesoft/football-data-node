@@ -56,23 +56,32 @@ class MatchService {
     return isCreated;
   }
 
-  async getUpCommingMatches(team_id){
+  async getUpCommingMatches(team_id) {
     let matches = [];
     try {
       await knex
-      .select("matchs.id")
+        .select("matchs.id")
         .from("matchs")
-        .where(function() {
-          this.where({ team_away_id: team_id })
-            .orWhere({ team_home_id: team_id });
+        .where(function () {
+          this.where({ team_away_id: team_id }).orWhere({
+            team_home_id: team_id,
+          });
         })
-          .where('matchs.matchdatetime', '>=', knex.raw('NOW()'))
-          .where(knex.raw('DATE(matchs.matchdatetime)'), '>=', knex.raw('CURDATE()'))
-          .where(knex.raw('TIME(matchs.matchdatetime)'), '>=', knex.raw('CURTIME()'))
-          .where("matchs.status", 0)
-          .leftJoin("team", "team.id", "matchs.team_away_id")
-          .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
-        .orderBy('matchs.matchdatetime', 'asc')
+        .where("matchs.matchdatetime", ">=", knex.raw("NOW()"))
+        .where(
+          knex.raw("DATE(matchs.matchdatetime)"),
+          ">=",
+          knex.raw("CURDATE()")
+        )
+        .where(
+          knex.raw("TIME(matchs.matchdatetime)"),
+          ">=",
+          knex.raw("CURTIME()")
+        )
+        .where("matchs.status", 0)
+        .leftJoin("team", "team.id", "matchs.team_away_id")
+        .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
+        .orderBy("matchs.matchdatetime", "asc")
         .then((res) => {
           if (res) {
             matches = res;
@@ -101,7 +110,7 @@ class MatchService {
           "matchs.date_match",
           "matchs.hour_match",
           "matchs.id as id",
-          "matchs.matchdatetime"
+          "matchs.matchdatetime",
         ])
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
@@ -222,8 +231,12 @@ class MatchService {
 
   async getMatchNotPlayed() {
     let match = null;
+    const currentDate = new Date().toISOString().split('T')[0];
     try {
-      let q = await knex.from("matchs").where("status", 1);
+      let q = await knex
+        .from("matchs")
+        .where("status", 1)
+        .whereRaw(`DATE(date_game) = '${currentDate}'`);
       if (q) {
         match = q;
       }

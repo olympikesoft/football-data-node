@@ -212,9 +212,9 @@ class TeamController {
     const userId = req.user.id;
     const description = req.body.description;
     const formationId = req.body.formationId;
-    const leagueId = req.body.leagueId;
-    const image = req.body.image;
-    const image_url = new Buffer.from(image, "binary").toString("base64");
+    // const leagueId = req.body.leagueId;
+    const image = req.file.buffer;
+    const image_url = image.toString("base64");
 
     if (Buffer.byteLength(image, "binary") > 500000) {
       // 500 KB
@@ -223,14 +223,27 @@ class TeamController {
         .send({ message: "Image size should be less than 500 KB." });
     }
 
-    const type = fileType(Buffer.from(image, "binary"));
-    if (
-      !type ||
-      !["image/jpeg", "image/png", "image/gif"].includes(type.mime)
-    ) {
-      return res
-        .status(400)
-        .send({ message: "Image type should be jpeg, png, or gif." });
+    const signature = image.toString("hex", 0, 4);
+    let mimeType;
+    switch (signature) {
+      case "89504e47":
+        mimeType = "image/png";
+        break;
+      case "47494638":
+        mimeType = "image/gif";
+        break;
+      case "ffd8ffe0":
+      case "ffd8ffe1":
+      case "ffd8ffe2":
+        mimeType = "image/jpeg";
+        break;
+      default:
+        mimeType = null;
+        break;
+    }
+
+    if (!mimeType) {
+      return res.status(400).send({ message: "File type not supported." });
     }
 
     let min = 0.5;
@@ -253,8 +266,7 @@ class TeamController {
         manager.id,
         description,
         formationId,
-        image_url,
-        leagueId
+        image_url
       );
 
       //      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(newTeam, leagueId);

@@ -23,7 +23,9 @@ const generateSchedule = (teams) => {
           round,
           home_team: awayTeams[i],
           away_team: homeTeams[i],
-          date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          date: new Date(
+            Date.now() + (round * 7 - 7) * 24 * 60 * 60 * 1000
+          ).toISOString(),
         });
       } else {
         matches.push({
@@ -31,7 +33,7 @@ const generateSchedule = (teams) => {
           home_team: homeTeams[i],
           away_team: awayTeams[i],
           date: new Date(
-            Date.now() + round * 7 * 24 * 60 * 60 * 1000
+            Date.now() + (round * 7 - 7) * 24 * 60 * 60 * 1000
           ).toISOString(),
         });
       }
@@ -43,6 +45,8 @@ const generateSchedule = (teams) => {
     const lastTeam = teams.pop();
     teams.splice(1, 0, lastTeam);
   }
+
+  console.log('schedule', JSON.stringify(schedule));
 
   return schedule;
 };
