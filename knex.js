@@ -1,4 +1,4 @@
-var Knex = require('Knex');
+var Knex = require('knex');
 
 let knex = Knex({
   client: 'mysql',
