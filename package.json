@@ -30,7 +30,9 @@
     "node-polyfill-webpack-plugin": "^2.0.1",
     "passport": "^0.6.0",
     "passport-discord": "^0.1.4",
-    "yup": "^1.0.2"
+    "yup": "^1.0.2",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

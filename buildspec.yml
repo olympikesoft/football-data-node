@@ -4,8 +4,6 @@ phases:
   install:
     commands:
       - echo "Installing dependencies..."
-      - npm install webpack --save-dev
-      - npm install webpack-cli --save-dev
       - npm install
 
   build:
@@ -20,10 +18,6 @@ phases:
 artifacts:
   files:
     - '**/*'
-
-cache:
-  paths:
-    - node_modules/
 
 env:
   variables:
