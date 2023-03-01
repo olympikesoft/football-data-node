@@ -67,21 +67,16 @@ class MatchService {
             team_home_id: team_id,
           });
         })
-        .where("matchs.matchdatetime", ">=", knex.raw("NOW()"))
+        .where("matchs.date_game", ">=", knex.raw("NOW()"))
         .where(
-          knex.raw("DATE(matchs.matchdatetime)"),
+          knex.raw("DATE(matchs.date_game)"),
           ">=",
           knex.raw("CURDATE()")
-        )
-        .where(
-          knex.raw("TIME(matchs.matchdatetime)"),
-          ">=",
-          knex.raw("CURTIME()")
         )
         .where("matchs.status", 0)
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
-        .orderBy("matchs.matchdatetime", "asc")
+        .orderBy("matchs.date_game", "asc")
         .then((res) => {
           if (res) {
             matches = res;

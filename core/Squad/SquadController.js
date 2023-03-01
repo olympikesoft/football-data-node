@@ -16,20 +16,15 @@ var MatchService = new MatchService();
 const moment = require("moment");
 
 class SquadController {
+
   async generateSquad(req, res, next) {
     let user_id = req.user.id;
+    let matchId = req.body.matchId;
     let squad = {
       goalkeeper: [],
       deffender: [],
       middlefield: [],
       stricker: [],
-    };
-
-    let errors = {
-      goalkeeperMissing: false,
-      deffenderMissing: false,
-      middlefieldMissing: false,
-      strickersMissing: false,
     };
 
     try {
@@ -51,7 +46,15 @@ class SquadController {
         });
       }
 
-      let checkHasSquad = await SquadService.getSquadDefined(team[0].id);
+      let match = await MatchService.getUpCommingMatches(team[0].id);
+      if(!match){
+        return res.status(400).json({
+          message:
+            "No match to play, join to league or friendly!",
+        });
+      }
+
+      let checkHasSquad = await SquadService.getSquadByMatch(team[0].id, matchId);
 
       if (checkHasSquad.length > 0) {
         return res.status(200).json({
@@ -80,8 +83,6 @@ class SquadController {
             obj.player = players_goalkeeper[index];
             squad.goalkeeper.push(obj);
           }
-        } else {
-          errors.goalkeeperMissing = true;
         }
 
         let players_defender = await PlayerService.getPlayersManagerAndPosition(
@@ -185,12 +186,6 @@ class SquadController {
 
   async getSquadTeam(req, res, next) {
     let user_id = req.user.id;
-    let squad = {
-      goalkeeper: [],
-      deffender: [],
-      middlefield: [],
-      stricker: [],
-    };
 
     try {
       let team = await TeamService.getTeamByUser(user_id);
@@ -213,7 +208,6 @@ class SquadController {
 
       // get id of current match
       let match = await MatchService.getUpCommingMatches(team[0].id);
-      console.log(match.length);
       if (match.length === 0) {
         return res.status(400).json({
           message:
@@ -293,6 +287,64 @@ class SquadController {
       } else {
         return res.status(501).json({
           message: "No allowed to add to the next Game",
+          success: false,
+        });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
+
+  async swapPlayerSquadMatch(req, res, next) {
+    let user_id = req.user.id;
+    let matchId = req.body.matchId;
+    let squadTitleId = req.body.squadTitleId;
+    let squadBenchId = req.body.squadBenchId; // Player goes to bench
+
+    try {
+      let team = await TeamService.getTeamByUser(user_id);
+      if (!team) {
+        return res.status(400).json({ message: "No team find" });
+      }
+
+      let match = await MatchService.getMatch(matchId);
+
+      if (!match) {
+        return res
+          .status(400)
+          .json({ message: "No match find", success: false });
+      }
+
+
+      if (moment().isBefore(moment(match.date_game))) {
+
+        // playerTitle => bench
+        let playerTitleId = await SquadService.getPlayerSquadById(squadTitleId);
+
+        await SquadService.changePlayerSquad(
+          match.id,
+          team[0].id,
+          playerTitleId.id,
+          playerTitleId.position_id,
+          0
+        );
+
+        let playerBenchId = await SquadService.getPlayerSquadById(squadBenchId);
+
+        await SquadService.changePlayerSquad(
+          match.id,
+          team[0].id,
+          playerBenchId.id,
+          playerBenchId.position_id,
+          1
+        );
+
+        return res.status(200).json({ message: "Swapped on Squad team", success: true });
+      } else {
+        return res.status(501).json({
+          message: "No allowed to swap in the actual Game",
           success: false,
         });
       }

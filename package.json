@@ -26,7 +26,8 @@
     "mysql": "^2.18.1",
     "node-cron": "^3.0.2",
     "passport": "^0.6.0",
-    "passport-discord": "^0.1.4"
+    "passport-discord": "^0.1.4",
+    "yup": "^1.0.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0"
