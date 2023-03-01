@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies..."
+      - npm install
+
+  build:
+    commands:
+      - echo "Building project..."
+      - npm run build
+
+  post_build:
+    commands:
+      - echo "Deploying project..."
+
+artifacts:
+  files:
+    - '**/*'
+
+cache:
+  paths:
+    - node_modules/
+
+env:
+  variables:
+    NODE_ENV: "production"
+
+computeType: BUILD_GENERAL1_SMALL
