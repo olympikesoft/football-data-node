@@ -29,7 +29,7 @@ var transactionRouter = require('./routes/transactions');
 var rankingRouter = require('./routes/ranking');
 var leagueRouter = require('./routes/league');
 
-const port = 9000;
+const port = process.env.PORT;
 
 var app = express();
 // var server = app.listen(port); socket.io
