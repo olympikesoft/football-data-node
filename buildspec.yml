@@ -27,6 +27,6 @@ env:
      DB_USER: "futtestolyio"
      DB_PASSWORD: "macandreRodrigues10A"
      DB_DATABASE: "football_data"
-     PORT: 8081
+     PORT: 5000
 
 computeType: BUILD_GENERAL1_SMALL
