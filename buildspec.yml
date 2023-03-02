@@ -28,5 +28,8 @@ env:
      DB_PASSWORD: "macandreRodrigues10A"
      DB_DATABASE: "football_data"
      PORT: 5000
+     secret: 'supersecretkey'
+     DISCORD_CLIENT_ID: 1076096752660258836
+     DISCORD_CLIENT_SECRET: '0VDEMNwogfgf-lhl6m2A552C9A7QtAGM'
 
 computeType: BUILD_GENERAL1_SMALL
