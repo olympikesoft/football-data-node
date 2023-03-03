@@ -49,8 +49,8 @@ class TeamService {
           description,
           formationId,
           image_url,
-          //colorHome,
-          //colorAway
+          colorHome,
+          colorAway
         })
         .then((result) => {
           if (result) {
