@@ -10,6 +10,8 @@ const verifyHasManager = async (req, res, next) => {
    tokenId = decoded.id
   });
 
+  console.log('tokenId', tokenId);
+
   let control = await ManagerService.checkManagerbyUser(tokenId);
   if (!control) {
     return res
