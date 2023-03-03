@@ -18,9 +18,10 @@ class UserService {
     return existUser;
   }
 
-  async register(email, name, mobile_phone, password) {
+  async register(email, name, password) {
     let isRegistered = null;
     try {
+      console.log('password', password);
       const hashedPassword = await functions.hashPassword(password);
       let form = {
         IsValid: "y",
@@ -30,10 +31,6 @@ class UserService {
         avatar_url:
           "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Coach_Yelling_Cartoon.svg/1024px-Coach_Yelling_Cartoon.svg.png",
       };
-
-      if (mobile_phone) {
-        form.mobile_phone = mobile_phone;
-      }
 
       await knex("user")
         .insert(form)
