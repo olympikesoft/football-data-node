@@ -1,5 +1,6 @@
 var ManagerService = require("../core/Manager/ManagerService");
 var ManagerService = new ManagerService();
+const jwt = require("jsonwebtoken");
 
 const verifyHasManager = async (req, res, next) => {
   var token = req.headers['x-access-token'];
