@@ -29,14 +29,8 @@ var transactionRouter = require('./routes/transactions');
 var rankingRouter = require('./routes/ranking');
 var leagueRouter = require('./routes/league');
 
-const port = process.env.PORT;
-
 var app = express();
 // var server = app.listen(port); socket.io
-
-app.listen(port, () => {
-    console.log(`App listening at http://localhost:${port}`)
-});
 
 app.use(logger('dev'));
 app.use(express.json());
