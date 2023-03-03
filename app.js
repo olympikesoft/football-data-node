@@ -46,8 +46,7 @@ app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
-    origin:'*', 
-   // origin: ['http://localhost:3000', 'https://react-typescript-football-simulator-f0obufrmz.vercel.app'],
+    origin: ['http://localhost:3000', 'https://react-typescript-football-simulator-f0obufrmz.vercel.app'],
     credentials: true
 }));
 
