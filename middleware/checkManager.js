@@ -2,9 +2,14 @@ var ManagerService = require("../core/Manager/ManagerService");
 var ManagerService = new ManagerService();
 
 const verifyHasManager = async (req, res, next) => {
-  let user_id = req.user.id;
-  console.log(user_id, 'user_id');
-  let control = await ManagerService.checkManagerbyUser(user_id);
+  var token = req.headers['x-access-token'];
+  let tokenId = null;
+  
+  jwt.verify(token, process.env.secret, (err, decoded) => {
+   tokenId = decoded.id
+  });
+
+  let control = await ManagerService.checkManagerbyUser(tokenId);
   if (!control) {
     return res
       .status(403)
