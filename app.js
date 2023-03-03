@@ -49,8 +49,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 const allowedOrigins = ['http://localhost:3000', 'https://react-typescript-football-simulator-f0obufrmz.vercel.app'];
 
 app.use(cors({
-  origin: allowedOrigins
+  origin: function(origin, callback) {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
 }));
+
 
 
 const discordOAuth2 = new DiscordOAuth2({
