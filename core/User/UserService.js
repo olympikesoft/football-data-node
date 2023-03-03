@@ -21,7 +21,6 @@ class UserService {
   async register(email, name, password) {
     let isRegistered = null;
     try {
-      console.log('password', password);
       const hashedPassword = await functions.hashPassword(password);
       let form = {
         IsValid: "y",

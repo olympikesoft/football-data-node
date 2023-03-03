@@ -211,7 +211,9 @@ class TeamController {
     const name = req.body.name;
     const userId = req.user.id;
     const description = req.body.description;
-    const formationId = req.body.formationId;
+    const formationId = 1;
+    const colorHome = req.body.colorHome;
+    const colorAway = req.body.colorAway;
     // const leagueId = req.body.leagueId;
     const image = req.file.buffer;
     const image_url = image.toString("base64");
@@ -266,7 +268,9 @@ class TeamController {
         manager.id,
         description,
         formationId,
-        image_url
+        image_url,
+        colorHome,
+        colorAway
       );
 
       //      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(newTeam, leagueId);

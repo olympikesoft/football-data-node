@@ -11,7 +11,7 @@ class TeamService {
     return team;
   }
 
-  async getTeamsExceptUserTeam(team_id){
+  async getTeamsExceptUserTeam(team_id) {
     let teams = null;
     try {
       teams = await knex.from("team").whereNot("team.id", team_id);
@@ -31,7 +31,15 @@ class TeamService {
     return team;
   }
 
-  async createTeam(name, manager_id, description, formationId, image_url){
+  async createTeam(
+    name,
+    manager_id,
+    description,
+    formationId,
+    image_url,
+    colorHome,
+    colorAway
+  ) {
     let teamCreated = null;
     try {
       await knex("team")
@@ -40,7 +48,9 @@ class TeamService {
           manager_id,
           description,
           formationId,
-          image_url
+          image_url,
+          //colorHome,
+          //colorAway
         })
         .then((result) => {
           if (result) {
@@ -64,7 +74,7 @@ class TeamService {
         .from("team")
         .where("manager.user_id", user_id)
         .leftJoin("manager", "manager.id", "team.manager_id")
-        .leftJoin("user", "user.id", "manager.user_id")
+        .leftJoin("user", "user.id", "manager.user_id");
     } catch (error) {
       console.log(error);
     }
@@ -79,13 +89,12 @@ class TeamService {
         .from("team")
         .where("team.id", team_id)
         .leftJoin("manager", "manager.id", "team.manager_id")
-        .leftJoin("user", "user.id", "manager.user_id")
+        .leftJoin("user", "user.id", "manager.user_id");
     } catch (error) {
       console.log(error);
     }
     return user;
   }
-  
 
   async updateTeam(id, object) {
     let isUpdated = false;
