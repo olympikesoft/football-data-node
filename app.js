@@ -45,10 +45,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+const allowedOrigins = ['http://localhost:3000', 'https://react-typescript-football-simulator-f0obufrmz.vercel.app'];
+
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://react-typescript-football-simulator-f0obufrmz.vercel.app'],
-    credentials: true
+  origin: allowedOrigins
 }));
+
 
 const discordOAuth2 = new DiscordOAuth2({
     clientId: process.env.DISCORD_CLIENT_ID,
