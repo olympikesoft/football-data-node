@@ -65,7 +65,6 @@ class UserController {
   async register(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
-    const mobile_phone = req.body.mobile_phone;
     const name = req.body.name;
     let existUser = await UserService.existUser(email);
     if (existUser) {
@@ -92,7 +91,7 @@ class UserController {
           let user_content = {
             token: token,
             user: user_content_detail,
-            path: "/chooseteam",
+            path: "/create-team",
           };
           return res.status(200).json(user_content);
         } else {
