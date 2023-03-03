@@ -60,7 +60,7 @@ class TeamController {
         throw new Error("League closed!");
       }
 
-      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(
+      let checkExistAlreadyOnLeague = await LeagueService.getTeamandLeagues(
         checkTeam[0].id,
         leagueId
       );
@@ -214,10 +214,7 @@ class TeamController {
     const formationId = 1;
     const colorHome = req.body.colorHome;
     const colorAway = req.body.colorAway;
-    // const leagueId = req.body.leagueId;
-    const image = req.file.buffer;
-    const image_url = image.toString("base64");
-
+   
     if (Buffer.byteLength(image, "binary") > 500000) {
       // 500 KB
       return res
@@ -272,8 +269,6 @@ class TeamController {
         colorHome,
         colorAway
       );
-
-      //      let checkExistAlreadyOnLeague = await LeagueService.getTeamLeagues(newTeam, leagueId);
 
       // if teamCreated create random players base on formation
       if (newTeam) {

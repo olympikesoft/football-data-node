@@ -103,7 +103,22 @@ class LeagueService {
     return haveInserted;
   }
 
-  async getTeamLeagues(team_id, league_id) {
+  async getTeamLeagues(team_id) {
+    let teamLeagues = [];
+    try {
+      teamLeagues = await knex
+        .select(["team.*"])
+        .from("team_has_league")
+        .where("team_has_league.team_id", team_id)
+        .leftJoin("team", "team.id", "team_has_league.team_id")
+        .leftJoin("league", "team.id", "team_has_league.league_id");
+    } catch (error) {
+      console.log(error);
+    }
+    return teamLeagues;
+  }
+
+  async getTeamandLeagues(team_id, league_id) {
     let teamLeagues = [];
     try {
       teamLeagues = await knex
@@ -127,7 +142,8 @@ class LeagueService {
         .from("team_has_league")
         .where("team_has_league.league_id", league_id)
         .leftJoin("team", "team.id", "team_has_league.team_id")
-        .leftJoin("league", "team.id", "team_has_league.league_id");
+        .leftJoin("league", "team.id", "team_has_league.league_id")
+        .orderBy(".team_has_league.created_at", "desc");
     } catch (error) {
       console.log(error);
     }

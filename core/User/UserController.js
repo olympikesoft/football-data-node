@@ -1,10 +1,16 @@
+const jwt = require("jsonwebtoken");
+
 var UserService = require("../User/UserService");
 var UserService = new UserService();
+
 var ManagerService = require("../Manager/ManagerService");
 var ManagerService = new ManagerService();
+
 var TeamService = require("../Team/TeamService");
 var TeamService = new TeamService();
-const jwt = require("jsonwebtoken");
+
+var LeagueService = require("../League/LeagueService");
+var LeagueService = new LeagueService();
 
 class UserController {
  
@@ -17,13 +23,23 @@ class UserController {
       if (existUser) {
         const users = await UserService.login(email, password);
         if (users.id > 0) {
-          let path = "/create-team"; // create-team
-
+          let path = "/lineup-team";
           let checkTeam = await TeamService.getTeamByUser(users.id);
-          if (checkTeam.length > 0) {
-            path = "/lineup-team";
+          if(checkTeam.length === 0){
+            path = "/create-team?step=1"; // create-team
           }
+          if (checkTeam.length > 0) {
+            let teamHasLeague = await LeagueService.getTeamLeagues(checkTeam[0].id);
 
+            if(teamHasLeague.length === 0){
+              path = "/create-team?step=2"
+            }else{
+              let league = await LeagueService.getLeagueById(teamHasLeague[0].league_id);
+              if(league[0].status === 2){
+                path = "/create-team?step=2";
+              }
+            }
+          }
           return res.status(200).json({ user: users, path: path });
         } else {
           return res.status(400).json({ message: "error authentication" });

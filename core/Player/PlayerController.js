@@ -17,7 +17,6 @@ class PlayerController {
         return res.status(404).json({ Message: "No team" });
       }
       let players = await PlayerService.getPlayersfromManager(userId);
-      console.log('players', players);
       if (players) {
         return res.status(200).json({ players: players });
       } else {
