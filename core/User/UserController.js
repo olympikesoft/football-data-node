@@ -73,7 +73,6 @@ class UserController {
       const registerUser = await UserService.register(
         email,
         name,
-        mobile_phone,
         password
       );
       if (registerUser > 0 && registerUser) {
