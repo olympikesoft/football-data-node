@@ -214,6 +214,7 @@ class TeamController {
     const formationId = 1;
     const colorHome = req.body.colorHome;
     const colorAway = req.body.colorAway;
+    const image = req.file.image;
    
     if (Buffer.byteLength(image, "binary") > 500000) {
       // 500 KB
