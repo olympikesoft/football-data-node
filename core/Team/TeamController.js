@@ -375,7 +375,7 @@ class TeamController {
       }
     } catch (err) {
       if (err) {
-        next(err);
+        console.log('err createTeam', err)
       }
     }
   }
