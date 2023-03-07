@@ -73,7 +73,7 @@ class MatchService {
           ">=",
           knex.raw("CURDATE()")
         )
-        .where("matchs.status", 0)
+        .where("matchs.status", 1)
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
         .orderBy("matchs.date_game", "asc")

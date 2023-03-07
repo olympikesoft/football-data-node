@@ -52,7 +52,7 @@ class UserService {
     try {
       const hashedPassword = await functions.hashPassword(password);
       let user = await knex("user")
-        .select(["user.id", "user.password", "user.email"])
+        .select(["user.id", "user.password", "user.email", "user.stars", "user.money_game"])
         .where("user.email", email);
       await functions
         .comparePassword(password, hashedPassword)
@@ -60,7 +60,7 @@ class UserService {
           if (isMatch) {
             token = {
               token: jwt.sign(
-                { id: user[0].id, name: user[0].name, email: user[0].email },
+                { id: user[0].id, name: user[0].name, email: user[0].email, stars: user[0].stars, money: user[0].money_game },
                 process.env.secret,
                 {
                   expiresIn: 86400,

@@ -71,7 +71,7 @@ class MatchInviteController {
       if (!team && team.length === 0) {
         return res.status(404).json({ Message: "No team" });
       }
-      if (!team_away && team_away.length === 0) {
+      if (!team_away) {
         return res.status(404).json({ Message: "No team away" });
       }
 
@@ -80,11 +80,12 @@ class MatchInviteController {
         team_away[0].id
       );
       if (insertMatchInvite) {
-        return res.status(200).json({ insertMatchInvite: insertMatchInvite });
+        return res.status(200).json({ insertMatchInvite: insertMatchInvite, success: true });
       } else {
-        return res.status(404).json({ Message: "No Match create" });
+        return res.status(404).json({ Message: "No Match create", success: false });
       }
     } catch (err) {
+      return res.status(500).json({ Message: "No Match create", success: false });
       if (err) {
         next(err);
       }

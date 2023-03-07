@@ -107,11 +107,11 @@ class LeagueService {
     let teamLeagues = [];
     try {
       teamLeagues = await knex
-        .select(["team_has_league.league_id"])
-        .from("team_has_league")
-        .where("team_has_league.team_id", team_id)
-        .leftJoin("team", "team.id", "team_has_league.team_id")
-        .leftJoin("league", "team.id", "team_has_league.league_id");
+      .select(["team_has_league.league_id", "league.active"])
+      .from("team_has_league")
+      .where("team_has_league.team_id", team_id)
+      .leftJoin("team", "team.id", "team_has_league.team_id")
+      .leftJoin("league", "league.id", "team_has_league.league_id");  
     } catch (error) {
       console.log(error);
     }

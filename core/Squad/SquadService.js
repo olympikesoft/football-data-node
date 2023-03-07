@@ -83,7 +83,7 @@ class SquadService {
     return players;
   }
 
-  async GetPlayerSquadById(squad_id) {
+  async getPlayerSquadById(squad_id) {
     let player = null;
     let CurrentYear = new Date().getFullYear();
 
@@ -98,7 +98,6 @@ class SquadService {
           "player.middle_capacity",
           "position.id as position_id",
           "position.name as position_name",
-          "squad.Position_id as position_id",
           "squad.Isplaying as isplaying",
         ])
         .from("squad")
@@ -119,7 +118,7 @@ class SquadService {
     return player;
   }
 
-  async ChangePlayerSquad(squad_id, Player_id, Isplaying) {
+  async changePlayerSquad(squad_id, Player_id, Isplaying) {
     let updated = false;
     try {
       await knex

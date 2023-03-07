@@ -60,6 +60,15 @@ class TeamController {
         throw new Error("League closed!");
       }
 
+      let teamHasAlreadyLeagues = await LeagueService.getTeamLeagues(checkTeam[0].id);
+      console.log(teamHasAlreadyLeagues);
+
+      if (teamHasAlreadyLeagues.length > 0 ){
+        if (teamHasAlreadyLeagues[0].active === 1) {
+          throw new Error("Team cannot link to another league if league not finished!");
+        }
+      }
+
       let checkExistAlreadyOnLeague = await LeagueService.getTeamandLeagues(
         checkTeam[0].id,
         leagueId
@@ -214,35 +223,31 @@ class TeamController {
     const formationId = 1;
     const colorHome = req.body.colorHome;
     const colorAway = req.body.colorAway;
-    const image = req.file.image;
-   
-    if (Buffer.byteLength(image, "binary") > 500000) {
+    const image = req.file.buffer.toString('base64')
+
+    if (req.file.size > 500000) {
       // 500 KB
       return res
         .status(400)
         .send({ message: "Image size should be less than 500 KB." });
     }
 
-    const signature = image.toString("hex", 0, 4);
-    let mimeType;
-    switch (signature) {
-      case "89504e47":
-        mimeType = "image/png";
+    let fileTypeIsValid = false;
+
+    let mimeType = req.file.mimetype
+    switch (mimeType) {
+      case "image/png":
+        fileTypeIsValid = true;
         break;
-      case "47494638":
-        mimeType = "image/gif";
-        break;
-      case "ffd8ffe0":
-      case "ffd8ffe1":
-      case "ffd8ffe2":
-        mimeType = "image/jpeg";
+      case "image/jpeg":
+        fileTypeIsValid = true;
         break;
       default:
-        mimeType = null;
+        fileTypeIsValid = false;
         break;
     }
 
-    if (!mimeType) {
+    if (!fileTypeIsValid) {
       return res.status(400).send({ message: "File type not supported." });
     }
 
@@ -266,7 +271,7 @@ class TeamController {
         manager.id,
         description,
         formationId,
-        image_url,
+        image,
         colorHome,
         colorAway
       );

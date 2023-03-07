@@ -40,6 +40,9 @@ class UserController {
               }
             }
           }
+          if(checkTeam.length > 0){
+            users.team = checkTeam[0];
+          }
           return res.status(200).json({ user: users, path: path });
         } else {
           return res.status(400).json({ message: "error authentication" });
