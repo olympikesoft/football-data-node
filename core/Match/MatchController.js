@@ -14,14 +14,35 @@ var PlayerService = require("../Player/PlayerService");
 var PlayerService = new PlayerService();
 
 class MatchController {
-  async getMatchesByCurrentTeam(req, res, next) {
+  async getPreviousMatchesCurrentTeam(req, res, next) {
     let userId = req.user.id;
     try {
       let team = await TeamService.getTeamByUser(userId);
       if (!team && team.length === 0) {
         return res.status(404).json({ Message: "No team" });
       }
-      let matches = await MatchService.getMatchsByTeamId(team[0].id);
+      let matches = await MatchService.getPreviousMatches(team[0].id);
+
+      if (matches.length > 0) {
+        return res.status(200).json({ matches: matches });
+      } else {
+        return res.status(404).json({ Message: "No matches" });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
+
+  async getUpCommingMatches(req, res, next) {
+    let userId = req.user.id;
+    try {
+      let team = await TeamService.getTeamByUser(userId);
+      if (!team && team.length === 0) {
+        return res.status(404).json({ Message: "No team" });
+      }
+      let matches = await MatchService.getUpCommingMatches(team[0].id);
 
       if (matches.length > 0) {
         return res.status(200).json({ matches: matches });

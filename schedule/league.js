@@ -4,13 +4,8 @@ var functions = require("../utils/functions");
 
 module.exports = () => {
   Cron.schedule("* * * * *", async () => {
-    // Get all the leagues from the database
     const leagues = await knex("league").select("*");
     for (const league of leagues) {
-      let dateStart = null;
-      let dateEnd = null;
-
-
       if (league.teams_reached === league.teams_limit && league.active === 1) {
         const teams = await knex("team_has_league")
           .where("league_id", league.id)
@@ -45,7 +40,7 @@ module.exports = () => {
         await knex("league").where("id", league.id).update({
           active: 2,
           date_start: round1Date,
-          date_end: lastDate
+          date_end: lastDate,
         });
       }
     }

@@ -207,6 +207,41 @@ class PlayerService {
     return checkExist;
   }
 
+  async getPlayersTeamAndPosition(position, team) {
+    let players = [];
+    try {
+      let q = await knex
+        .distinct()
+        .select([
+          "player.id",
+          "player.name",
+          "player.attack_capacity",
+          "player.deffense_capacity",
+          "player.middle_capacity",
+          "position.id as position_id",
+          "position.name as position_name",
+          "country.name as country_name",
+        ])
+        .from("team_has_player")
+        .where("team.id", team)
+        .where("position.name", position)
+        .leftJoin("player", "player.id", "team_has_player.Player_id")
+        .leftJoin("team", "team.id", "team_has_player.team_id")
+        .leftJoin("manager", "manager.id", "team.manager_id")
+        .leftJoin("position", "position.id", "player.Position_id")
+        .leftJoin("country", "country.id", "player.Country_id");
+
+      if (q != undefined) {
+        for (let index = 0; index < q.length; index++) {
+          players.push(q[index]);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return players;
+  }
+
   async getPlayersManagerAndPosition(position, user_id) {
     let players = [];
 

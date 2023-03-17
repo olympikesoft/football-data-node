@@ -20,8 +20,8 @@ class LeagueController {
   }
 
   async getLeagueStand(req, res, next) {
-    let leagueId = 1;
-    let round = 1;
+    let leagueId = req.query.leagueId
+    let round = req.query.round;
     try {
       const homeResults = await knex
         .from("matchs")
@@ -166,14 +166,6 @@ class LeagueController {
       });
 
       return res.status(200).json({ stands: sortedStandings });
-
-      /*  if (stands.length > 0) {
-        return res
-          .status(200)
-          .json({ stands: stands });
-      } else {
-        res.status(400).json({ message: "Not found" });
-      } */
     } catch (error) {
       console.log(error);
     }

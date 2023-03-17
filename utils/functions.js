@@ -46,7 +46,7 @@ const generateSchedule = (teams) => {
     teams.splice(1, 0, lastTeam);
   }
 
-  console.log('schedule', JSON.stringify(schedule));
+  console.log("schedule", JSON.stringify(schedule));
 
   return schedule;
 };

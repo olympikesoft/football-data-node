@@ -7,7 +7,7 @@ var SquadController  = require('../core/Squad/SquadController')
 
 const squad = new SquadController();
 
-router.post('/create', userMiddleware, verifyHasManager, (req, res, next) => squad.generateSquad(req, res, next));
+//router.post('/create', userMiddleware, verifyHasManager, (req, res, next) => squad.generateSquad(req, res, next));
 router.get('/get', userMiddleware, verifyHasManager, (req, res, next) => squad.getSquadTeam(req, res, next));
 router.post('/add-player', userMiddleware, verifyHasManager, (req, res, next) => squad.addPlayerSquadMatch(req, res, next));
 

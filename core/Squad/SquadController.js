@@ -17,6 +17,7 @@ const moment = require("moment");
 
 class SquadController {
 
+  /*
   async generateSquad(req, res, next) {
     let user_id = req.user.id;
     let matchId = req.body.matchId;
@@ -30,7 +31,7 @@ class SquadController {
     try {
       let team = await TeamService.getTeamByUser(user_id);
       if (!team) {
-        return res.status(400).json({ message: "No team finded" });
+        return res.status(400).json({ message: "No team" });
       }
 
       let players = await PlayerService.getPlayersfromTeam(team[0].id);
@@ -182,7 +183,7 @@ class SquadController {
         next(err);
       }
     }
-  }
+  }*/
 
   async getSquadTeam(req, res, next) {
     let user_id = req.user.id;
@@ -214,8 +215,7 @@ class SquadController {
             "No match upcomming",
         });
       }
-
-      let squadTeam = await SquadService.getSquadDefinedWithMatch(team[0].id, match[0].id);
+      let squadTeam = await SquadService.getSquadDefinedWithMatch(team[0].id, match[0].match_id);
       if (squadTeam.length > 0) {
         return res.status(200).json({
           squad: squadTeam

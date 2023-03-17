@@ -60,7 +60,7 @@ class MatchService {
     let matches = [];
     try {
       await knex
-        .select("matchs.id")
+        .select(["matchs.id as match_id", "team.id as team_home_id", "team2.id as team_away_id"])
         .from("matchs")
         .where(function () {
           this.where({ team_away_id: team_id }).orWhere({
@@ -68,15 +68,38 @@ class MatchService {
           });
         })
         .where("matchs.date_game", ">=", knex.raw("NOW()"))
-        .where(
-          knex.raw("DATE(matchs.date_game)"),
-          ">=",
-          knex.raw("CURDATE()")
-        )
+        .where(knex.raw("DATE(matchs.date_game)"), ">=", knex.raw("CURDATE()"))
         .where("matchs.status", 1)
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
-        .orderBy("matchs.date_game", "asc")
+        .orderBy("matchs.date_game", "desc")
+        .then((res) => {
+          if (res) {
+            matches = res;
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return matches;
+  }
+
+  async getPreviousMatches(team_id) {
+    let matches = [];
+    try {
+      await knex
+        .select(["matchs.*"])
+        .from("matchs")
+        .where(function () {
+          this.where({ team_away_id: team_id }).orWhere({
+            team_home_id: team_id,
+          });
+        })
+        .where("matchs.date_game", "<", knex.raw("NOW()"))
+        .where(knex.raw("DATE(matchs.date_game)"), "<", knex.raw("CURDATE()"))
+        .leftJoin("team", "team.id", "matchs.team_away_id")
+        .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
+        .orderBy("matchs.date_game", "desc")
         .then((res) => {
           if (res) {
             matches = res;
@@ -205,6 +228,24 @@ class MatchService {
     return hasCreated;
   }
 
+  async updateSquadInfo(id, squad_generated_home, squad_generated_away){
+    let hasUpdated = false;
+    try {
+      await knex
+        .from("matchs")
+        .where({ id: id })
+        .update({ squad_generated_home: squad_generated_home, squad_generated_away: squad_generated_away })
+        .then((res) => {
+          if (res) {
+            hasUpdated = true;
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return hasUpdated;
+  }
+
   // update score and update from status === 2
   async updateMatchResultById(id, score_home, score_away) {
     let hasUpdated = false;
@@ -224,14 +265,35 @@ class MatchService {
     return hasUpdated;
   }
 
+  /* match not played but the squad was generated*/
   async getMatchNotPlayed() {
     let match = null;
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = new Date().toISOString().split("T")[0];
     try {
       let q = await knex
         .from("matchs")
         .where("status", 1)
+        .where("squad_generated_home", 1)
+        .where("squad_generated_away", 1)
         .whereRaw(`DATE(date_game) = '${currentDate}'`);
+      if (q) {
+        match = q;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return match;
+  }
+
+  /* match not played but the squad was not generated*/
+  async getMatchNotSquadPlayed() {
+    let match = null;
+    try {
+      let q = await knex
+        .from("matchs")
+        .where("status", 1)
+        .where("squad_generated_home", 0)
+        .where("squad_generated_away", 0)
       if (q) {
         match = q;
       }

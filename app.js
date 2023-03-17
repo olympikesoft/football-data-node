@@ -15,6 +15,7 @@ var knex = require("./knex");
 //require('./schedule/transfers')();
 require("./schedule/matches")();
 require("./schedule/league")();
+require("./schedule/squad")();
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");

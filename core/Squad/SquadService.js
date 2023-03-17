@@ -198,7 +198,7 @@ class SquadService {
     return players;
   }
 
-  async generateSquad(team_id, Player_id, Position_id, isPlaying) {
+  async generateSquad(match_id, team_id, Player_id, Position_id, isPlaying) {
     let haveInserted = false;
 
     let object = {
@@ -207,6 +207,7 @@ class SquadService {
       Position_id: Position_id,
       isPlaying: isPlaying,
       status: 1,
+      match_id: match_id
     };
     try {
       await knex
