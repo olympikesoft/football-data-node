@@ -48,5 +48,4 @@ RUN mysqld --user=mysql & \
     mysql -u${MYSQL_USER} footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
     mysqladmin shutdown
 
-# Start the app
-CMD [ "node", "./bin/www" ]
+CMD ["sh", "-c", "mysqld --user=mysql & sleep 5s && node ./bin/www"]
