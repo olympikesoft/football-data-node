@@ -21,10 +21,13 @@ app.set('port', port);
  * Create HTTPS server.
  */
 
+/*
 var options = {
   key: fs.readFileSync(path.join(__dirname, '..', 'key-unencrypted.pem')),
   cert: fs.readFileSync(path.join(__dirname, '..', 'cert.pem'))
-};
+};*/
+
+const options = {};
 
 var server = https.createServer(options, app);
 

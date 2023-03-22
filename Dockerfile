@@ -1,26 +1,25 @@
-# Use an official Node.js runtime as the base image
-FROM node:14
+FROM node:lts-alpine
 
-# Set the working directory to /app
 WORKDIR /app
 
 # Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
 
-# Install the dependencies
-RUN npm install
+# Install the app dependencies
+RUN npm install --only=production
 
-# Copy the rest of the application code to the container
-COPY . .
+# Copy the SQL file to the container
+COPY database.sql /docker-entrypoint-initdb.d/
 
-# Set the environment variables for MySQL connection
-ENV DB_HOST=localhost
-ENV DB_USER=root
-ENV DB_PASSWORD=password
-ENV DB_NAME=mydatabase
+# Set environment variables for the app
+ENV NODE_ENV production
+ENV MYSQL_DATABASE footballdata
+ENV MYSQL_USER  futtestolyio
+ENV MYSQL_PASSWORD futtestolyiosoccer2020A@
+ENV MYSQL_HOST localhost
 
-# Expose the port used by the application
+# Expose the port that the app will listen on
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+# Start the app
+CMD [ "npm", "start" ]

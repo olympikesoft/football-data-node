@@ -1,27 +1,23 @@
-version: '3.9'
-
+version: '3'
 services:
   db:
-    image: mysql:8
+    image: mysql:latest
     environment:
-      MYSQL_DATABASE: mydatabase
-      MYSQL_ROOT_PASSWORD: password
-    volumes:
-      - db_data:/var/lib/mysql
+      MYSQL_DATABASE: footballdata
+      MYSQL_USER: futtestolyio
+      MYSQL_PASSWORD: futtestolyiosoccer2020A@
+      MYSQL_ROOT_PASSWORD: futtestolyiosoccer2020A@
     ports:
       - "3306:3306"
-
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./footballdata.sql:/docker-entrypoint-initdb.d/database.sql
   app:
     build: .
     ports:
       - "3000:3000"
     depends_on:
       - db
-    environment:
-      DB_HOST: db
-      DB_USER: root
-      DB_PASSWORD: password
-      DB_NAME: mydatabase
 
 volumes:
-  db_data:
+  db-data:
