@@ -6,10 +6,10 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install the app dependencies
-RUN npm install --only=production
+RUN npm install
 
 # Copy the SQL file to the container
-COPY database.sql /docker-entrypoint-initdb.d/
+COPY footballdata.sql /docker-entrypoint-initdb.d/
 
 # Set environment variables for the app
 ENV NODE_ENV production
