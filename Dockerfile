@@ -1,28 +1,28 @@
 FROM node:lts-alpine
 
-# Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the container
+# Copy the package.json and package-lock.json files to the container
 COPY package*.json ./
 
-# Install app dependencies
+# Install the app dependencies
 RUN npm install
-
-# Copy the app source code to the container
-COPY . .
 
 # Copy the SQL file to the container
 COPY footballdata.sql /docker-entrypoint-initdb.d/
 
-# Set environment variables for the app and MySQL
+COPY ./bin/www ./bin/www
+
+COPY . .
+
+# Set environment variables for the app
 ENV NODE_ENV production
 ENV MYSQL_DATABASE footballdata
 ENV MYSQL_USER  futtebolgogo
 ENV MYSQL_PASSWORD futtebolgogoFelix@
 ENV MYSQL_PORT 3306
 ENV MYSQL_HOST localhost
-ENV secret supersecretkeysss
+ENV secret supersecretkey
 ENV DISCORD_CLIENT_ID 1076096752660258836
 ENV DISCORD_CLIENT_SECRET 0VDEMNwogfgf-lhl6m2A552C9A7QtAGM
 ENV PORT 8081
@@ -30,7 +30,7 @@ ENV PORT 8081
 # Expose the port that the app will listen on
 EXPOSE 8081
 
-# Update and upgrade the package manager, then install MySQL and its client without cache
+# Install MySQL client and server
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache mysql mysql-client && \
@@ -38,14 +38,15 @@ RUN apk update && \
     chown mysql:mysql /run/mysqld
 
 # Start MySQL service and create database and table
-RUN mysqld --user=mysql --skip-networking --skip-grant-tables --skip-host-cache --skip-name-resolve & \
+RUN mysqld --user=mysql --initialize-insecure --skip-ssl && \
+    mysqld --user=mysql --skip-networking & \
     sleep 5s && \
+    mysql -u root -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';" && \
+    mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT OPTION;" && \
+    mysql -u root -e "FLUSH PRIVILEGES;" && \
     mysql -u${MYSQL_USER} -e "CREATE DATABASE footballdata;" && \
     mysql -u${MYSQL_USER} footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
-    mysql -u root -e "CREATE USER 'futtebolgogo'@'%' IDENTIFIED BY 'futtebolgogoFelix@';" && \
-    mysql -u root -e "GRANT ALL PRIVILEGES ON footballdata.* TO 'futtebolgogo'@'%';" && \
-    mysql -u root footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
-    mysqladmin shutdown
+    mysqladmin shutdown && \
+    sed -i 's/^skip-networking/#skip-networking/' /etc/my.cnf.d/mariadb-server.cnf
 
-# Set the command to start the app
-CMD ["sh", "-c", "${MYSQL_HOST}:${MYSQL_PORT} -t 60 -- mysqld --user=mysql --skip-networking --skip-grant-tables --skip-host-cache --skip-name-resolve & sleep 5s && node ./bin/www"]
+CMD ["sh", "-c", "mysqld --user=mysql & sleep 5s && node ./bin/www"]
