@@ -36,11 +36,11 @@ RUN apk update && \
     apk add --no-cache mysql mysql-client && \
     mkdir /run/mysqld && \
     chown mysql:mysql /run/mysqld && \
-    /etc/init.d/mariadb setup && \
-    /etc/init.d/mariadb start && \
+    /etc/init.d/mysql setup && \
+    /etc/init.d/mysql start && \
     mysql -uroot -e "CREATE DATABASE footballdata;" && \
     mysql -uroot futtestolyio < /docker-entrypoint-initdb.d/footballdata.sql && \
-    /etc/init.d/mariadb stop
+    /etc/init.d/mysql stop
 
 # Start the app
 CMD [ "node", "./bin/www" ]
