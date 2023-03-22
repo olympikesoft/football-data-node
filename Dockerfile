@@ -47,9 +47,5 @@ RUN mysqld --user=mysql --skip-networking --skip-grant-tables --skip-host-cache 
     mysql -u root footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
     mysqladmin shutdown
 
-# Copy wait-for-it.sh script to the container and make it executable
-COPY wait-for-it.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/wait-for-it.sh
-
 # Set the command to start the app
-CMD ["sh", "-c", "wait-for-it.sh ${MYSQL_HOST}:${MYSQL_PORT} -t 60 -- mysqld --user=mysql --skip-networking --skip-grant-tables --skip-host-cache --skip-name-resolve & sleep 5s && node ./bin/www"]
+CMD ["sh", "-c", "${MYSQL_HOST}:${MYSQL_PORT} -t 60 -- mysqld --user=mysql --skip-networking --skip-grant-tables --skip-host-cache --skip-name-resolve & sleep 5s && node ./bin/www"]
