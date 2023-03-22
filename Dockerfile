@@ -35,12 +35,13 @@ RUN apk update && \
     apk upgrade && \
     apk add --no-cache mysql mysql-client && \
     mkdir /run/mysqld && \
-    chown mysql:mysql /run/mysqld && \
-    /etc/init.d/mysql setup && \
-    /etc/init.d/mysql start && \
+    chown mysql:mysql /run/mysqld
+
+# Start MySQL service and create database and table
+RUN mysqld --user=mysql && \
     mysql -uroot -e "CREATE DATABASE footballdata;" && \
-    mysql -uroot futtestolyio < /docker-entrypoint-initdb.d/footballdata.sql && \
-    /etc/init.d/mysql stop
+    mysql -uroot footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
+    mysqladmin shutdown
 
 # Start the app
 CMD [ "node", "./bin/www" ]
