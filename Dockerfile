@@ -30,17 +30,18 @@ ENV PORT 8081
 # Expose the port that the app will listen on
 EXPOSE 8081
 
-# Start MySQL service and create database and table
 RUN apk update && \
     apk upgrade && \
     apk add --no-cache mysql mysql-client && \
     mkdir /run/mysqld && \
     chown mysql:mysql /run/mysqld
 
-# Start MySQL service and create database and table
-RUN mysqld --user=mysql && \
-    mysql -uroot -e "CREATE DATABASE footballdata;" && \
-    mysql -uroot footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
+RUN mysqld --user=mysql & \
+    sleep 5s && \
+    mysql_install_db --user=mysql && \
+    mysqld --user=mysql && \
+    mysql -u${MYSQL_USER} -e "CREATE DATABASE footballdata;" && \
+    mysql -u${MYSQL_USER} footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
     mysqladmin shutdown
 
 # Start the app
