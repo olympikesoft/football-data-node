@@ -4,9 +4,9 @@ services:
     image: mysql:latest
     environment:
       MYSQL_DATABASE: footballdata
-      MYSQL_USER: futtestolyio
-      MYSQL_PASSWORD: futtestolyiosoccer2020A@
-      MYSQL_ROOT_PASSWORD: futtestolyiosoccer2020A@
+      MYSQL_USER: futtebolgogo
+      MYSQL_PASSWORD: futtebolgogoFelix@
+      MYSQL_ROOT_PASSWORD: futtebolgogoFelix@
     ports:
       - "3306:3306"
     volumes:
