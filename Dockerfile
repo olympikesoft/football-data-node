@@ -36,10 +36,14 @@ RUN apk update && \
     mkdir /run/mysqld && \
     chown mysql:mysql /run/mysqld
 
+# Start MySQL service and create database and table
 RUN mysqld --user=mysql & \
     sleep 5s && \
-    mysql_install_db --user=mysql && \
-    mysqld --user=mysql && \
+    mysqladmin shutdown && \
+    rm -rf /var/lib/mysql && \
+    mysqld --user=mysql --initialize-insecure --skip-ssl && \
+    mysqld --user=mysql & \
+    sleep 5s && \
     mysql -u${MYSQL_USER} -e "CREATE DATABASE footballdata;" && \
     mysql -u${MYSQL_USER} footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
     mysqladmin shutdown
