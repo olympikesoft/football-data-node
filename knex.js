@@ -4,10 +4,10 @@ let knex = Knex({
   client: 'mysql2',
   debug: true,
   connection: {
-    'host': process.env.DB_HOST,
-    'user': process.env.DB_USER,
-    'database': process.env.DB_DATABASE,
-    'password': process.env.DB_PASSWORD,
+    'host': process.env.MYSQL_DATABASE,
+    'user': process.env.MYSQL_USER,
+    'database': process.env.MYSQL_DATABASE,
+    'password': process.env.MYSQL_PASSWORD,
   },
   pool: {
     min: 0, max: 7,
