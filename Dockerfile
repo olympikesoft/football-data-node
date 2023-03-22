@@ -13,6 +13,8 @@ RUN npm install
 # Copy the SQL file to the container
 COPY footballdata.sql /docker-entrypoint-initdb.d/
 
+COPY . .
+
 # Set environment variables for the app
 ENV NODE_ENV production
 ENV MYSQL_DATABASE footballdata
