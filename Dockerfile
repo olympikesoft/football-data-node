@@ -38,7 +38,7 @@ RUN apk update && \
     chown mysql:mysql /run/mysqld
 
 # Start MySQL service and create database and table
-RUN mysqld --user=mysql --initialize-insecure --skip-ssl && \
+RUN mysqld --user=mysql --skip-ssl && \
     mysqld --user=mysql --skip-networking & \
     sleep 5s && \
     mysql -u root -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';" && \
