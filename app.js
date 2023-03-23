@@ -49,14 +49,17 @@ app.use(passport.session());
 
 app.use(express.static(path.join(__dirname, "public")));
 
+// allow requests from a specific origin
 app.use(cors({
-  origin: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'Access-Control-Allow-Origin']
+  origin: 'https://urchin-app-mv3vn.ondigitalocean.app'
 }));
 
 // set the Access-Control-Allow-Origin header for all responses
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'https://urchin-app-mv3vn.ondigitalocean.app');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Credentials', true);
   next();
 });
 
