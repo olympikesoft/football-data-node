@@ -11,11 +11,11 @@ const DiscordStrategy = require("passport-discord").Strategy;
 const DiscordOAuth2 = require("discord-oauth2");
 var knex = require("./knex");
 
-//require('./schedule/players')();
-//require('./schedule/transfers')();
+/*
 require("./schedule/matches")();
 require("./schedule/league")();
 require("./schedule/squad")();
+*/
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
@@ -51,8 +51,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(cors({
   origin: true,
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'Access-Control-Allow-Origin']
 }));
+
 
 const discordOAuth2 = new DiscordOAuth2({
   clientId: process.env.DISCORD_CLIENT_ID,
