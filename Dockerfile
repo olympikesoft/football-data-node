@@ -27,26 +27,6 @@ ENV DISCORD_CLIENT_ID 1076096752660258836
 ENV DISCORD_CLIENT_SECRET 0VDEMNwogfgf-lhl6m2A552C9A7QtAGM
 ENV PORT 8081
 
-# Expose the port that the app will listen on
 EXPOSE 8081
 
-# Install MySQL client and server
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache mysql mysql-client && \
-    mkdir /run/mysqld && \
-    chown mysql:mysql /run/mysqld
-
-# Start MySQL service and create database and table
-RUN mysqld --user=mysql --skip-ssl && \
-    mysqld --user=mysql --skip-networking & \
-    sleep 5s && \
-    mysql -u root -e "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';" && \
-    mysql -u root -e "GRANT ALL PRIVILEGES ON *.* TO '${MYSQL_USER}'@'%' WITH GRANT OPTION;" && \
-    mysql -u root -e "FLUSH PRIVILEGES;" && \
-    mysql -u${MYSQL_USER} -e "CREATE DATABASE footballdata;" && \
-    mysql -u${MYSQL_USER} footballdata < /docker-entrypoint-initdb.d/footballdata.sql && \
-    mysqladmin shutdown && \
-    sed -i 's/^skip-networking/#skip-networking/' /etc/my.cnf.d/mariadb-server.cnf
-
-CMD ["sh", "-c", "mysqld --user=mysql & sleep 5s && node ./bin/www"]
+CMD ["node ./bin/www"]

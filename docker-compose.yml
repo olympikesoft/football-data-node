@@ -1,23 +1,39 @@
 version: '3'
+
 services:
-  db:
-    image: mysql:latest
-    environment:
-      MYSQL_DATABASE: footballdata
-      MYSQL_USER: futtebolgogo
-      MYSQL_PASSWORD: futtebolgogoFelix@
-      MYSQL_ROOT_PASSWORD: futtebolgogoFelix@
-    ports:
-      - "3306:3306"
-    volumes:
-      - db-data:/var/lib/mysql
-      - ./footballdata.sql:/docker-entrypoint-initdb.d/database.sql
   app:
     build: .
     ports:
-      - "8081:8081"
+      - '3000:3000'
     depends_on:
       - db
-
-volumes:
-  db-data:
+    environment:
+      - MYSQL_HOST=footballdata
+      - MYSQL_USER=futtebolgogo
+      - MYSQL_PASSWORD=futtebolgogoFelix@
+      - MYSQL_DATABASE=futtebolgogoFelix@
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=futtebolgogoFelix@
+      - MYSQL_USER=futtebolgogo
+      - MYSQL_PASSWORD=futtebolgogoFelix@
+      - MYSQL_DATABASE=footballdata
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./footballdata.sql:/docker-entrypoint-initdb.d/database.sql
+    ports:
+      - '3306:3306'
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - MYSQL_ROOT_PASSWORD=futtebolgogoFelix@
+      - MYSQL_USER=futtebolgogo
+      - MYSQL_PASSWORD=futtebolgogoFelix@
+    ports:
+      - '8080:80'
+    depends_on:
+      - db
+    container_name: my_phpmyadmin
+    hostname: phpmyadmin.local
