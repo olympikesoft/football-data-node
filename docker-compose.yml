@@ -8,14 +8,14 @@ services:
     environment:
       - NODE_ENV=production
       - DB_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
-      - DB_USER=sgroot
+      - DB_USER=dev
       - DB_PASSWORD=kTEnc6v-MyY81OFb
       - DB_NAME=footballdata
   db:
     image: mysql:8.0
     environment:
       - MYSQL_ROOT_PASSWORD=kTEnc6v-MyY81OFb
-      - MYSQL_USER=sgroot
+      - MYSQL_USER=dev
       - MYSQL_PASSWORD=kTEnc6v-MyY81OFb
       - MYSQL_DATABASE=footballdata
       - MYSQL_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com

@@ -15,7 +15,7 @@ COPY . .
 # Set environment variables for the app
 ENV NODE_ENV production
 ENV MYSQL_DATABASE footballdata
-ENV MYSQL_USER  sgroot
+ENV MYSQL_USER  dev
 ENV MYSQL_PASSWORD kTEnc6v-MyY81OFb@
 ENV MYSQL_PORT 3306
 ENV MYSQL_HOST SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
