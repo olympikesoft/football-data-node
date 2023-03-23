@@ -5,35 +5,21 @@ services:
     build: .
     ports:
       - '3000:3000'
-    depends_on:
-      - db
     environment:
-      - MYSQL_HOST=footballdata
-      - MYSQL_USER=futtebolgogo
-      - MYSQL_PASSWORD=futtebolgogoFelix@
-      - MYSQL_DATABASE=futtebolgogoFelix@
+      - NODE_ENV=production
+      - DB_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
+      - DB_USER=sgroot
+      - DB_PASSWORD=kTEnc6v-MyY81OFb
+      - DB_NAME=footballdata
   db:
-    image: mysql
+    image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=futtebolgogoFelix@
-      - MYSQL_USER=futtebolgogo
-      - MYSQL_PASSWORD=futtebolgogoFelix@
+      - MYSQL_ROOT_PASSWORD=kTEnc6v-MyY81OFb
+      - MYSQL_USER=sgroot
+      - MYSQL_PASSWORD=kTEnc6v-MyY81OFb
       - MYSQL_DATABASE=footballdata
+      - MYSQL_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
     volumes:
-      - db-data:/var/lib/mysql
-      - ./footballdata.sql:/docker-entrypoint-initdb.d/database.sql
+      - ./mysql:/var/lib/mysql
     ports:
       - '3306:3306'
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      - PMA_ARBITRARY=1
-      - MYSQL_ROOT_PASSWORD=futtebolgogoFelix@
-      - MYSQL_USER=futtebolgogo
-      - MYSQL_PASSWORD=futtebolgogoFelix@
-    ports:
-      - '8080:80'
-    depends_on:
-      - db
-    container_name: my_phpmyadmin
-    hostname: phpmyadmin.local
