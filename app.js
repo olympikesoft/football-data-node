@@ -54,6 +54,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'Access-Control-Allow-Origin']
 }));
 
+// set the Access-Control-Allow-Origin header for all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://urchin-app-mv3vn.ondigitalocean.app');
+  next();
+});
+
 
 const discordOAuth2 = new DiscordOAuth2({
   clientId: process.env.DISCORD_CLIENT_ID,
