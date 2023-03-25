@@ -50,6 +50,7 @@ app.use(passport.session());
 app.use(express.static(path.join(__dirname, "public")));
 
 // allow requests from a specific origin
+/*
 app.use(cors({
   origin: 'https://urchin-app-mv3vn.ondigitalocean.app'
 }));
@@ -62,7 +63,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', true);
   next();
 });
-
+*/
 
 const discordOAuth2 = new DiscordOAuth2({
   clientId: process.env.DISCORD_CLIENT_ID,
