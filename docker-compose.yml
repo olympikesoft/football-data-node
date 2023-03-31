@@ -1,25 +1,17 @@
 version: '3'
-
 services:
   app:
     build: .
     ports:
-      - '3000:3000'
+      - '8081:8081'
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=dev
       - DB_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
-      - DB_USER=dev
+      - DB_USER=sgroot
       - DB_PASSWORD=kTEnc6v-MyY81OFb
       - DB_NAME=footballdata
-  db:
-    image: mysql:8.0
-    environment:
-      - MYSQL_ROOT_PASSWORD=kTEnc6v-MyY81OFb
-      - MYSQL_USER=dev
-      - MYSQL_PASSWORD=kTEnc6v-MyY81OFb
-      - MYSQL_DATABASE=footballdata
-      - MYSQL_HOST=SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
-    volumes:
-      - ./mysql:/var/lib/mysql
-    ports:
-      - '3306:3306'
+      - PORT=8081
+      - secret=supersecretkey
+      - DISCORD_CLIENT_ID=1076096752660258836
+      - DISCORD_CLIENT_SECRET=0VDEMNwogfgf-lhl6m2A552C9A7QtAGM
+    command: ["node", "./bin/www"]

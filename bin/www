@@ -6,7 +6,7 @@
 
 var app = require('../app');
 var debug = require('debug')('football-data:server');
-var https = require('https');
+var http = require('http'); // Change this line from 'https' to 'http'
 var fs = require('fs');
 var path = require('path');
 
@@ -29,7 +29,7 @@ var options = {
 
 const options = {};
 
-var server = https.createServer(options, app);
+var server = http.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
