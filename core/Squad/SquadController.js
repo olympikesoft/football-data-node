@@ -299,47 +299,24 @@ class SquadController {
 
   async swapPlayerSquadMatch(req, res, next) {
     let user_id = req.user.id;
-    let matchId = req.body.matchId;
-    let squadTitleId = req.body.squadTitleId;
-    let squadBenchId = req.body.squadBenchId; // Player goes to bench
-
+    let squadElements = req.body.squad;
     try {
       let team = await TeamService.getTeamByUser(user_id);
       if (!team) {
-        return res.status(400).json({ message: "No team find" });
+        return res.status(400).json({ message: "No team find", success: false });
       }
 
-      let match = await MatchService.getMatch(matchId);
-
-      if (!match) {
-        return res
-          .status(400)
-          .json({ message: "No match find", success: false });
+      if (!squadElements) {
+        return res.status(400).json({ message: "No squadElements find", success: false });
       }
 
 
       if (moment().isBefore(moment(match.date_game))) {
 
-        // playerTitle => bench
-        let playerTitleId = await SquadService.getPlayerSquadById(squadTitleId);
-
-        await SquadService.changePlayerSquad(
-          match.id,
-          team[0].id,
-          playerTitleId.id,
-          playerTitleId.position_id,
-          0
-        );
-
-        let playerBenchId = await SquadService.getPlayerSquadById(squadBenchId);
-
-        await SquadService.changePlayerSquad(
-          match.id,
-          team[0].id,
-          playerBenchId.id,
-          playerBenchId.position_id,
-          1
-        );
+        for (let index = 0; index < squadElements.length; index++) {
+          const squad = squad[index];
+          let updateSquad =  await SquadService.updatePlayerSquad(squad.id, squad.id, squad.isplaying);
+        }
 
         return res.status(200).json({ message: "Swapped on Squad team", success: true });
       } else {

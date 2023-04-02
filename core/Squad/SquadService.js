@@ -140,6 +140,27 @@ class SquadService {
     return updated;
   }
 
+  async updatePlayerSquad(squad_id, Player_id, Isplaying) {
+    let updated = false;
+    try {
+      await knex
+        .from("squad")
+        .update({ Player_id: Player_id, IsPlaying: Isplaying })
+        .where("squad.id", squad_id)
+        .then((res) => {
+          if (res) {
+            updated = true;
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return updated;
+  }
+
   async playerIsMatchSquad(match_id, player_id) {
     let playerIsSquad = false;
     try {
