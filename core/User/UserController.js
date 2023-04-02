@@ -113,7 +113,7 @@ class UserController {
           );
           let user_content = {
             token: token,
-            user: user_content_detail,
+            user: userInfo,
             path: "/create-team",
           };
           return res.status(200).json(user_content);
