@@ -96,7 +96,7 @@ class UserController {
       if (registerUser > 0 && registerUser) {
         let obj = { user_id: registerUser };
         const manager = await ManagerService.createManager(obj);
-        let user_content_detail = await UserService.getUser(registerUser);
+        let userInfo = await UserService.getUser(registerUser);
         if (manager) {
           const token = jwt.sign(
             {
