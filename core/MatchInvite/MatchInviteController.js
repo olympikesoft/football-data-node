@@ -91,6 +91,46 @@ class MatchInviteController {
       }
     }
   }
+
+  async acceptMatchInvite(req, res, next) {
+    let matchInviteId = req.body.matchInviteId;
+    let userId = req.user.id;
+    let tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    try {
+      let team = await TeamService.getTeamByUser(userId);
+      if (!team && team.length === 0) {
+        return res.status(404).json({ Message: "No team" });
+      }
+
+      let matchInvite = await MatchInviteService.getMatchInviteById(matchInviteId);
+
+      if(!matchInvite){
+        return res.status(404).json({ Message: "No Match create", success: false });
+      }
+
+      // Only able to accept 1 match invite per day
+      let checkTeamInvite = await MatchInviteService.checkIfTeamCanAcceptInvite(team[0].id);
+      if(!checkTeamInvite){
+        return res.status(500).json({ Message: "No able to accept match invite more than one day", success: false});
+      }
+      let acceptInvite = await MatchInviteService.updateMatchInviteById(matchInviteId);
+      if (acceptInvite) {
+
+        let insertMatch = await MatchService.createMatch(
+          matchInvite.team_home_id,
+          matchInvite.team_away_id,
+          tomorrow
+        );
+
+        // create match
+        return res.status(200).json({ Message: 'Match invite accepted, now you have 24 hours to prepare to the match!' , success: true });
+      } else {
+        return res.status(404).json({ Message: "No Match create", success: false });
+      }
+    } catch (err) {
+      return res.status(500).json({ Message: "No Match create", success: false });
+    }
+  }
 }
 
 module.exports = MatchInviteController;

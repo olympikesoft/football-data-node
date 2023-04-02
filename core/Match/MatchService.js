@@ -30,14 +30,14 @@ class MatchService {
     return Matchs;
   }
 
-  async createMatch(team_away_id, team_home_id, league_id, date) {
+  async createMatch(team_away_id, team_home_id, date) {
     let isCreated = null;
     try {
       let obj = {
         team_away_id,
         team_home_id,
-        date,
-        league_id,
+        date_match: date,
+        league_id: 0,
       };
       await knex
         .from("matchs")
