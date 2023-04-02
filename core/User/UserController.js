@@ -13,7 +13,6 @@ var LeagueService = require("../League/LeagueService");
 var LeagueService = new LeagueService();
 
 class UserController {
- 
   async login(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
@@ -25,22 +24,26 @@ class UserController {
         if (users.id > 0) {
           let path = "/lineup-team";
           let checkTeam = await TeamService.getTeamByUser(users.id);
-          if(checkTeam.length === 0){
+          if (checkTeam.length === 0) {
             path = "/create-team?step=1"; // create-team
           }
           if (checkTeam.length > 0) {
-            let teamHasLeague = await LeagueService.getTeamLeagues(checkTeam[0].id);
+            let teamHasLeague = await LeagueService.getTeamLeagues(
+              checkTeam[0].id
+            );
 
-            if(teamHasLeague.length === 0){
-              path = "/create-team?step=2"
-            }else{
-              let league = await LeagueService.getLeagueById(teamHasLeague[0].league_id);
-              if(league[0].status === 2){
+            if (teamHasLeague.length === 0) {
+              path = "/create-team?step=2";
+            } else {
+              let league = await LeagueService.getLeagueById(
+                teamHasLeague[0].league_id
+              );
+              if (league[0].status === 2) {
                 path = "/create-team?step=2";
               }
             }
           }
-          if(checkTeam.length > 0){
+          if (checkTeam.length > 0) {
             users.team = checkTeam[0];
           }
           return res.status(200).json({ user: users, path: path });
@@ -53,7 +56,7 @@ class UserController {
     } catch (error) {
       if (error) {
         //next(error)
-        console.log('error', error);
+        console.log("error", error);
       }
     }
   }
@@ -89,18 +92,20 @@ class UserController {
     if (existUser) {
       return res.status(404).json({ error: "error already exist account" });
     } else {
-      const registerUser = await UserService.register(
-        email,
-        name,
-        password
-      );
+      const registerUser = await UserService.register(email, name, password);
       if (registerUser > 0 && registerUser) {
         let obj = { user_id: registerUser };
         const manager = await ManagerService.createManager(obj);
         let user_content_detail = await UserService.getUser(registerUser);
         if (manager) {
           const token = jwt.sign(
-            { id: user_content_detail.id },
+            {
+              id: userInfo.user[0].id,
+              name: userInfo.user[0].name,
+              email: userInfo.user[0].email,
+              stars: userInfo.user[0].stars,
+              money: userInfo.user[0].money_game,
+            },
             process.env.secret,
             {
               expiresIn: 86400,
