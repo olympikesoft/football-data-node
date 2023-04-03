@@ -67,10 +67,7 @@ class MatchInviteService {
     .leftJoin("team", "team.id", "match_invite.user_one_id")
     .leftJoin('team as team2', 'team2.id', 'match_invite.user_two_id')
     .orderBy('match_invite.created_at');
-    if (existingInvite) {
-      return false;
-    }
-    return true; 
+    return existingInvite; 
   }
 
   async checkIfTeamCanAcceptInvite(team_id) {

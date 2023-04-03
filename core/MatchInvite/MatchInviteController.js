@@ -109,7 +109,7 @@ class MatchInviteController {
       let matchInvite = await MatchInviteService.getMatchInviteById(matchInviteId);
 
 
-      if(!matchInvite){
+      if(matchInvite.length === 0){
         return res.status(404).json({ Message: "No Match create", success: false });
       }
 
