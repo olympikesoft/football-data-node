@@ -11,11 +11,10 @@ const DiscordStrategy = require("passport-discord").Strategy;
 const DiscordOAuth2 = require("discord-oauth2");
 var knex = require("./knex");
 
-/*
+
 require("./schedule/matches")();
 require("./schedule/league")();
 require("./schedule/squad")();
-*/
 
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
