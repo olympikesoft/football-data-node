@@ -70,6 +70,7 @@ class MatchInviteService {
   }
 
   async checkIfTeamCanAcceptInvite(team_id) {
+    let canPlay = false;
     const today = new Date().toISOString().slice(0, 10); // get today's date in ISO format
     const existingInvite = await knex
       .from("match_invite")
@@ -78,12 +79,10 @@ class MatchInviteService {
         qb.where({ user_one_id: team_id }).orWhere({ user_two_id: team_id });
       })
       .whereRaw(`DATE(created_at) = ?`, today)
-      .first();
-  
-    if (existingInvite) {
-      return false;
+    if (existingInvite.length === 0) {
+      canPlay = true;
     }
-    return true; 
+    return canPlay; 
   }
 
   async updateMatchInviteById(id) {
