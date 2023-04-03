@@ -107,9 +107,10 @@ class TeamController {
         return res.status(404).json({ Message: "No teams" });
       }
 
+      
       for (let index = 0; index < teams.length; index++) {
         let teamEl = teams[index];
-        let matches = await MatchService.getMatchsByTeamId(teamEl.id);
+      /*  let matches = await MatchService.getMatchsByTeamId(teamEl.id);
 
         teams[index]["n_matches"] = matches.length;
         teams[index]["n_goals_scored"] = matches
@@ -152,7 +153,7 @@ class TeamController {
           return false;
         });
 
-        teams[index]["percentage_win"] = (wins.length / matches.length) * 100;
+        teams[index]["percentage_win"] = (wins.length / matches.length) * 100;*/
 
         let playersGoalKeeper =
           await PlayerService.getPlayersfromTeamAndPosition(
