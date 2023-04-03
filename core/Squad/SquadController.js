@@ -237,6 +237,7 @@ class SquadController {
     }
   }
 
+  /*
   async addPlayerSquadMatch(req, res, next) {
     let user_id = req.user.id;
     let matchId = req.body.matchId;
@@ -295,7 +296,7 @@ class SquadController {
         next(err);
       }
     }
-  }
+  }*/
 
   async swapPlayerSquadMatch(req, res, next) {
     let user_id = req.user.id;

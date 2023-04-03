@@ -17,7 +17,6 @@ class MatchService {
           "matchs.score_away",
           "matchs.score_home",
           "matchs.date_game",
-          "matchs.hour_match",
         ])
         .where({ team_away_id: team_id })
         .orWhere({ team_home_id: team_id })
@@ -70,9 +69,7 @@ class MatchService {
           "matchs.score_away",
           "matchs.score_home",
           "matchs.date_game",
-          "matchs.hour_match",
           "matchs.id as match_id",
-          "matchs.matchdatetime"
         ])
         .from("matchs")
         .where(function () {
@@ -112,9 +109,7 @@ class MatchService {
             "matchs.score_away",
             "matchs.score_home",
             "matchs.date_game",
-            "matchs.hour_match",
             "matchs.id as match_id",
-            "matchs.matchdatetime",
           ])
         .from("matchs")
         .where(function () {
@@ -153,9 +148,7 @@ class MatchService {
           "matchs.score_away",
           "matchs.score_home",
           "matchs.date_game",
-          "matchs.hour_match",
           "matchs.id as id",
-          "matchs.matchdatetime",
         ])
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
