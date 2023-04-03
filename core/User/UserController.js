@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const sgMail = require("@sendgrid/mail");
 
 var UserService = require("../User/UserService");
 var UserService = new UserService();
@@ -11,6 +12,8 @@ var TeamService = new TeamService();
 
 var LeagueService = require("../League/LeagueService");
 var LeagueService = new LeagueService();
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 class UserController {
   async login(req, res, next) {
@@ -116,6 +119,38 @@ class UserController {
             user: userInfo,
             path: "/create-team",
           };
+
+          const msg = {
+            to: email, 
+            from: "admin@soccersquadmanager.com",
+            subject: "Registration Confirmation",
+            html: `
+              <html>
+                <head>
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <style>
+                    /* Add your responsive styles here */
+                  </style>
+                </head>
+                <body>
+                  <h1>Thank you for registering for the football game manager!</h1>
+                  <p>Here's some information about the manager:</p>
+                  <ul>
+                    <li>Manage your football games and teams in one place</li>
+                    <li>Create and share schedules with ease</li>
+                    <li>Keep track of scores and player stats</li>
+                  </ul>
+                  <p>We're excited to have you join our community. If you have any questions, please don't hesitate to contact us.</p>
+                </body>
+              </html>
+            `,
+          };
+
+          sgMail
+            .send(msg)
+            .then(() => console.log("Email sent successfully"))
+            .catch((error) => console.error(error));
+
           return res.status(200).json(user_content);
         } else {
           return res.status(404).json({ error: "error creating manager" });

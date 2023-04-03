@@ -14,4 +14,5 @@ services:
       - secret=supersecretkey
       - DISCORD_CLIENT_ID=1076096752660258836
       - DISCORD_CLIENT_SECRET=0VDEMNwogfgf-lhl6m2A552C9A7QtAGM
+      - SENDGRID_API_KEY=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
     command: ["node", "./bin/www"]
