@@ -78,6 +78,7 @@ class MatchInviteService {
       .where((qb) => {
         qb.where({ user_one_id: team_id }).orWhere({ user_two_id: team_id });
       })
+      .where({'status': 2})
       .whereRaw(`DATE(created_at) = ?`, today)
     if (existingInvite.length === 0) {
       canPlay = true;
