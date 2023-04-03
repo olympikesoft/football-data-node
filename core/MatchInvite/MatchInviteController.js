@@ -97,6 +97,9 @@ class MatchInviteController {
     let userId = req.user.id;
     let today = new Date();
     let tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+    console.log('matchInviteId', matchInviteId);
+
     try {
       let team = await TeamService.getTeamByUser(userId);
       if (!team && team.length === 0) {
@@ -105,7 +108,6 @@ class MatchInviteController {
 
       let matchInvite = await MatchInviteService.getMatchInviteById(matchInviteId);
 
-      console.log('matchInviteId', matchInviteId);
 
       if(!matchInvite){
         return res.status(404).json({ Message: "No Match create", success: false });
