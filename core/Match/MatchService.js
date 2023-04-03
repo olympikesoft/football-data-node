@@ -16,14 +16,14 @@ class MatchService {
           "team2.id as team_home_id",
           "matchs.score_away",
           "matchs.score_home",
-          "matchs.date_match",
+          "matchs.date_game",
           "matchs.hour_match",
         ])
         .where({ team_away_id: team_id })
         .orWhere({ team_home_id: team_id })
         .leftJoin("team", "team.id", "matchs.team_away_id")
         .leftJoin("team as team2", "team2.id", "matchs.team_home_id")
-        .orderBy("matchs.date_match");
+        .orderBy("matchs.date_game");
     } catch (error) {
       console.log(error);
     }
@@ -36,7 +36,7 @@ class MatchService {
       let obj = {
         team_away_id,
         team_home_id,
-        date_match: date,
+        date_game: date,
         league_id: 0,
       };
       await knex
@@ -69,7 +69,7 @@ class MatchService {
           "team2.id as team_home_id",
           "matchs.score_away",
           "matchs.score_home",
-          "matchs.date_match",
+          "matchs.date_game",
           "matchs.hour_match",
           "matchs.id as match_id",
           "matchs.matchdatetime"
@@ -111,7 +111,7 @@ class MatchService {
             "team2.id as team_home_id",
             "matchs.score_away",
             "matchs.score_home",
-            "matchs.date_match",
+            "matchs.date_game",
             "matchs.hour_match",
             "matchs.id as match_id",
             "matchs.matchdatetime",
@@ -152,7 +152,7 @@ class MatchService {
           "team2.id as team_home_id",
           "matchs.score_away",
           "matchs.score_home",
-          "matchs.date_match",
+          "matchs.date_game",
           "matchs.hour_match",
           "matchs.id as id",
           "matchs.matchdatetime",
