@@ -123,8 +123,8 @@ class MatchInviteController {
       if (acceptInvite) {
 
         let insertMatch = await MatchService.createMatch(
-          matchInvite.team_home_id,
-          matchInvite.team_away_id,
+          matchInvite[0].team_away_id,
+          matchInvite[0].team_home_id,
           tomorrow
         );
 
