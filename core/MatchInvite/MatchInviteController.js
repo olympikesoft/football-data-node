@@ -1,6 +1,9 @@
 var MatchInviteService = require("./MatchInviteService");
 var MatchInviteService = new MatchInviteService();
 
+var MatchService = require("../Match/MatchService");
+var MatchService = new MatchService();
+
 var TeamService = require("../Team/TeamService");
 var TeamService = new TeamService();
 
