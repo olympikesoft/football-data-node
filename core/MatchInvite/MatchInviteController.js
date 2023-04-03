@@ -95,6 +95,7 @@ class MatchInviteController {
   async acceptMatchInvite(req, res, next) {
     let matchInviteId = req.body.matchInviteId;
     let userId = req.user.id;
+    let today = new Date();
     let tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
     try {
       let team = await TeamService.getTeamByUser(userId);
