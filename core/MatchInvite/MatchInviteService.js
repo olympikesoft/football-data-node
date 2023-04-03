@@ -61,9 +61,8 @@ class MatchInviteService {
     "team2.id as team_home_id", 
     "match_invite.created_at",
     "match_invite.status",
-    "match_invite.id as match_invite_id"
   ])
-    .where({ 'match_invite_id': id })
+  .where("match_invite_id.id", id)
     .leftJoin("team", "team.id", "match_invite.user_one_id")
     .leftJoin('team as team2', 'team2.id', 'match_invite.user_two_id')
     .orderBy('match_invite.created_at');
