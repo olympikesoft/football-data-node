@@ -133,6 +133,7 @@ class MatchInviteController {
         return res.status(404).json({ Message: "No Match create", success: false });
       }
     } catch (err) {
+      console.log('error', err);
       return res.status(500).json({ Message: "No Match create", success: false });
     }
   }

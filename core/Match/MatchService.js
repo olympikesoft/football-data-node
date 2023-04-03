@@ -60,7 +60,20 @@ class MatchService {
     let matches = [];
     try {
       await knex
-        .select(["matchs.id as match_id", "team.id as team_home_id", "team2.id as team_away_id"])
+        .select([
+          "team.name as team_away_name",
+          "team.image_url as team_away_image_url",
+          "team.id as team_away_id",
+          "team2.name as team_home_name",
+          "team2.image_url as team_home_image_url",
+          "team2.id as team_home_id",
+          "matchs.score_away",
+          "matchs.score_home",
+          "matchs.date_match",
+          "matchs.hour_match",
+          "matchs.id as match_id",
+          "matchs.matchdatetime"
+        ])
         .from("matchs")
         .where(function () {
           this.where({ team_away_id: team_id }).orWhere({
@@ -88,7 +101,21 @@ class MatchService {
     let matches = [];
     try {
       await knex
-        .select(["matchs.*"])
+        .select(
+          [
+            "team.name as team_away_name",
+            "team.image_url as team_away_image_url",
+            "team.id as team_away_id",
+            "team2.name as team_home_name",
+            "team2.image_url as team_home_image_url",
+            "team2.id as team_home_id",
+            "matchs.score_away",
+            "matchs.score_home",
+            "matchs.date_match",
+            "matchs.hour_match",
+            "matchs.id as match_id",
+            "matchs.matchdatetime",
+          ])
         .from("matchs")
         .where(function () {
           this.where({ team_away_id: team_id }).orWhere({

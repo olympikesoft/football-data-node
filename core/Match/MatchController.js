@@ -35,6 +35,27 @@ class MatchController {
     }
   }
 
+  async getPreviousMatchesCurrentTeam(req, res, next) {
+    let userId = req.user.id;
+    try {
+      let team = await TeamService.getTeamByUser(userId);
+      if (!team && team.length === 0) {
+        return res.status(404).json({ Message: "No team" });
+      }
+      let matches = await MatchService.getPreviousMatches(team[0].id);
+
+      if (matches.length > 0) {
+        return res.status(200).json({ matches: matches });
+      } else {
+        return res.status(404).json({ Message: "No matches" });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
+
   async getUpCommingMatches(req, res, next) {
     let userId = req.user.id;
     try {
@@ -56,6 +77,7 @@ class MatchController {
     }
   }
 
+  /*
   async inviteMatch(req, res, next) {
     let userId = req.user.id;
     let teamOpponentId = parseInt(req.body.teamOpponentId);
@@ -99,7 +121,7 @@ class MatchController {
         next(err);
       }
     }
-  }
+  }*/
 
   async getMatch(req, res, next) {
     let match_id = req.param("match_id");
