@@ -36,7 +36,6 @@ class MatchService {
         team_away_id,
         team_home_id,
         date_game: date,
-        league_id: 0,
       };
       await knex
         .from("matchs")

@@ -51,8 +51,9 @@ class MatchInviteService {
   }
 
   async getMatchInviteById(id) {
-    const existingInvite = await knex
-    await knex.from("match_invite")
+    let matchInvite = null;
+    await knex
+    .from("match_invite")
     .select(["team.name as team_away_name", 
     "team.image_url as team_away_image_url",
     "team.id as team_away_id",
@@ -65,8 +66,13 @@ class MatchInviteService {
   .where("match_invite.id", id)
     .leftJoin("team", "team.id", "match_invite.user_one_id")
     .leftJoin('team as team2', 'team2.id', 'match_invite.user_two_id')
-    .orderBy('match_invite.created_at');
-    return existingInvite; 
+    .orderBy('match_invite.created_at')
+    .then((res) => {
+      if (res) {
+        matchInvite = res;
+      }
+    });
+    return matchInvite; 
   }
 
   async checkIfTeamCanAcceptInvite(team_id) {
@@ -78,7 +84,7 @@ class MatchInviteService {
       .where((qb) => {
         qb.where({ user_one_id: team_id }).orWhere({ user_two_id: team_id });
       })
-      .where({'status': 2})
+      .where({'status': '2'})
       .whereRaw(`DATE(created_at) = ?`, today)
     if (existingInvite.length === 0) {
       canPlay = true;

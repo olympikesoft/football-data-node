@@ -13,7 +13,7 @@ var PlayerService = new PlayerService();
 var SquadService = new SquadService();
 
 module.exports = () => {
-  Cron.schedule("* * * * *", async () => {
+  Cron.schedule("0 0 * * *", async () => {
     const matches = await MatchService.getMatchNotSquadPlayed();
     for (const match of matches) {
       const { id, team_home_id, team_away_id } = match;

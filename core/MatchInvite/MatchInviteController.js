@@ -114,6 +114,7 @@ class MatchInviteController {
         return res.status(404).json({ Message: "No Match create", success: false });
       }
 
+      console.log(matchInvite);
       // Only able to accept 1 match invite per day
       let checkTeamInvite = await MatchInviteService.checkIfTeamCanAcceptInvite(team[0].id);
       if(!checkTeamInvite){
@@ -121,7 +122,6 @@ class MatchInviteController {
       }
       let acceptInvite = await MatchInviteService.updateMatchInviteById(matchInviteId);
       if (acceptInvite) {
-
         let insertMatch = await MatchService.createMatch(
           matchInvite[0].team_away_id,
           matchInvite[0].team_home_id,

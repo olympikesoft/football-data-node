@@ -13,7 +13,7 @@ var PlayerService = new PlayerService();
 var SquadService = new SquadService();
 
 module.exports = () => {
-  Cron.schedule("* * * * *", async () => {
+  Cron.schedule("0 0 * * *", async () => {
     const matches = await MatchService.getMatchNotPlayed();
     for (let index = 0; index < matches.length; index++) {
       const match = matches[index];
