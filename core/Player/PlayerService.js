@@ -296,7 +296,7 @@ class PlayerService {
     return players;
   }
 
-  async RemovePlayerFromTeam(player_id, team_id) {
+  async removePlayerFromTeam(player_id, team_id) {
     let deleted = true;
     try {
       let q = await knex

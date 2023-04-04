@@ -77,25 +77,24 @@ class TransferService {
   }
 
   async GetTransfersExcludingPlayers(team_id, players_ids) {
-    console.log(team_id);
     let players = [];
     let q = null;
     try {
-        q = await knex
-          .select([
-            "transfers.id as transfer_id",
-            "position.name as position_name",
-            "transfers.price",
-            "player.id as player_id",
-            "player.*",
-          ])
-          .from("transfers")
-          .whereNot("transfers.seller_team_id", team_id)
-          .whereNull("transfers.buy_team_id")
-          .whereNotIn("player.id", players_ids)
-          .leftJoin("player", "player.id", "transfers.player_id")
-          .leftJoin("team", "team.id", "transfers.seller_team_id")
-          .leftJoin("position", "position.id", "player.position_id");
+      q = await knex
+        .select([
+          "transfers.id as transfer_id",
+          "position.name as position_name",
+          "transfers.price",
+          "player.id as player_id",
+          "player.*",
+        ])
+        .from("transfers")
+        .whereNot("transfers.seller_team_id", team_id)
+        .whereNull("transfers.buy_team_id")
+        .whereNotIn("player.id", players_ids)
+        .leftJoin("player", "player.id", "transfers.player_id")
+        .leftJoin("team", "team.id", "transfers.seller_team_id")
+        .leftJoin("position", "position.id", "player.position_id");
       if (q) {
         players = q;
       }
@@ -201,7 +200,34 @@ class TransferService {
     return haveSelled;
   }
 
-  async SellerTeamPlayer(seller_team_id, player_id, player_cost) {
+  async checkPlayerAlreadySale(seller_team_id, player_id) {
+    let players = [];
+    let q = null;
+    try {
+      q = await knex
+        .select([
+          "transfers.id as transfer_id",
+          "position.name as position_name",
+          "transfers.price",
+          "player.id as player_id",
+          "player.*",
+        ])
+        .from("transfers")
+        .where("transfers.seller_team_id", seller_team_id)
+        .where("player.id", player_id)
+        .leftJoin("player", "player.id", "transfers.player_id")
+        .leftJoin("team", "team.id", "transfers.seller_team_id")
+        .leftJoin("position", "position.id", "player.position_id");
+      if (q) {
+        players = q;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return players;
+  }
+
+  async sellerTeamPlayer(seller_team_id, player_id, player_cost) {
     let haveSelled = false;
 
     let object = {

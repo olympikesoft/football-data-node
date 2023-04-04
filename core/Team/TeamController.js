@@ -104,116 +104,37 @@ class TeamController {
       if (!teams && teams.length === 0) {
         return res.status(404).json({ Message: "No teams" });
       }
-
-      
-      for (let index = 0; index < teams.length; index++) {
-        let teamEl = teams[index];
-      /*  let matches = await MatchService.getMatchsByTeamId(teamEl.id);
-
-        teams[index]["n_matches"] = matches.length;
-        teams[index]["n_goals_scored"] = matches
-          .filter(
-            (match) =>
-              match.team_home_id === teamEl.id ||
-              match.team_away_id === teamEl.id
-          )
-          .reduce((totalGoals, match) => {
-            if (match.team_home_id === teamEl.id) {
-              return totalGoals + match.score_home;
-            } else {
-              return totalGoals + match.score_away;
-            }
-          }, 0);
-        teams[index]["n_goals_conceded"] = matches
-          .filter(
-            (x) => x.team_away_id === teamEl.id || x.team_home_id === teamEl.id
-          )
-          .reduce(
-            (sum, record) =>
-              sum +
-              (teamEl.id === record.team_away_id
-                ? record.score_home
-                : record.score_away),
-            0
-          );
-
-        const wins = matches.filter((match) => {
-          const isHomeTeam = match.team_home_id === teamEl.id;
-          const isAwayTeam = match.team_away_id === teamEl.id;
-
-          // Check if the team won the match
-          if (isHomeTeam && match.score_home > match.score_away) {
-            return true;
-          } else if (isAwayTeam && match.score_away > match.score_home) {
-            return true;
-          }
-
-          return false;
-        });
-
-        teams[index]["percentage_win"] = (wins.length / matches.length) * 100;*/
-
-        let playersGoalKeeper =
-          await PlayerService.getPlayersfromTeamAndPosition(
-            teamEl.id,
-            "goalkeeper"
-          );
-        let playersDeffenders =
-          await PlayerService.getPlayersfromTeamAndPosition(
-            teamEl.id,
-            "defender"
-          );
-        let playersMiddlefield =
-          await PlayerService.getPlayersfromTeamAndPosition(
-            teamEl.id,
-            "midfielder"
-          );
-        let playersStrickers =
-          await PlayerService.getPlayersfromTeamAndPosition(
-            teamEl.id,
-            "striker"
-          );
-
-        let goalKeeperOveral = playersGoalKeeper.reduce(
-          (sum, record) => sum + record.goalkeeper_capacity,
-          0
-        );
-
-        teams[index]["goalkeeperOveral"] = Math.floor(
-          goalKeeperOveral / playersGoalKeeper.length
-        );
-
-        let deffenseOveral = playersDeffenders.reduce(
-          (sum, record) => sum + record.deffense_capacity,
-          0
-        );
-        teams[index]["deffenseOveral"] = Math.floor(
-          deffenseOveral / playersDeffenders.length
-        );
-
-        let MiddleOveral = playersMiddlefield.reduce(
-          (sum, record) => sum + record.middle_capacity,
-          0
-        );
-        teams[index]["MiddleOveral"] = Math.floor(
-          MiddleOveral / playersMiddlefield.length
-        );
-
-        let StrickerOveral = playersStrickers.reduce(
-          (sum, record) => sum + record.attack_capacity,
-          0
-        );
-        teams[index]["StrickerOveral"] = Math.floor(
-          StrickerOveral / playersStrickers.length
-        );
-      }
-      return res.status(200).json({ teams: teams });
+  
+      const playerPositions = ["goalkeeper", "defender", "midfielder", "striker"];
+  
+      const getPlayersOveral = async (teamId, position) => {
+        const players = await PlayerService.getPlayersfromTeamAndPosition(teamId, position);
+        const overal = players.reduce((sum, player) => sum + player[`${position}_capacity`], 0);
+        return Math.floor(overal / players.length);
+      };
+  
+      const teamsWithPlayersOveral = await Promise.all(
+        teams.map(async (team) => {
+          const playersPromises = playerPositions.map((position) => getPlayersOveral(team.id, position));
+          const [goalkeeperOveral, deffenseOveral, middleOveral, strikerOveral] = await Promise.all(playersPromises);
+          return {
+            ...team,
+            goalkeeperOveral,
+            deffenseOveral,
+            MiddleOveral: middleOveral,
+            StrickerOveral: strikerOveral,
+          };
+        })
+      );
+  
+      return res.status(200).json({ teams: teamsWithPlayersOveral });
     } catch (err) {
       if (err) {
         next(err);
       }
     }
   }
+  
 
   async createTeam(req, res, next) {
     const name = req.body.name;

@@ -98,7 +98,7 @@ class TransfersController {
         money_game: user_seller,
       });
 
-      let delete_player = await PlayerService.RemovePlayerFromTeam(
+      let delete_player = await PlayerService.removePlayerFromTeam(
         market[0].player_id,
         market[0].seller_team_id
       );
@@ -110,8 +110,64 @@ class TransfersController {
       if (insert_player) {
         return res.status(200).json({ success: true });
       } else {
+        return res.status(500).json({
+          message: "Error on adding player to buyer, try later",
+        });
+      }
+    } catch (err) {
+      if (err) {
+        next(err);
+      }
+    }
+  }
+
+  async sellPlayer(req, res, next) {
+    let user_id = req.user.id;
+    let playerId = parseInt(req.body.playerId);
+    let price = parseInt(req.body.price);
+    try {
+      let checkPlayerAlreadySale = await TransferService.checkPlayerAlreadySale(
+        user_id,
+        playerId
+      );
+
+      if (checkPlayerAlreadySale.length > 0) {
+        return res
+          .status(200)
+          .json({
+            message: "You cannot sell the same player twice",
+            success: false,
+          });
+      }
+      let teamUser = await TeamService.getTeamByUser(user_id);
+
+      let players_from_team = await PlayerService.getPlayersfromTeam(
+        teamUser[0].id
+      );
+
+      if (players_from_team.length < 11) {
+        if (
+          players_from_team.filter((x) => x.player_id === market[0].player_id)
+            .length > 0
+        ) {
+          return res.status(200).json({
+            message: "You cannot sell player",
+            success: false,
+          });
+        }
+      }
+
+      let sellPlayer = await TransferService.sellerTeamPlayer(
+        teamUser[0].id,
+        playerId,
+        price
+      );
+      if (sellPlayer) {
+        return res.status(200).json({ success: true });
+      } else {
         return res.status(200).json({
           message: "Error on adding player to buyer, try later",
+          success: false,
         });
       }
     } catch (err) {
