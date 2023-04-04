@@ -61,8 +61,6 @@ class TeamController {
       }
 
       let teamHasAlreadyLeagues = await LeagueService.getTeamLeagues(checkTeam[0].id);
-      console.log(teamHasAlreadyLeagues);
-
       if (teamHasAlreadyLeagues.length > 0 ){
         if (teamHasAlreadyLeagues[0].active === 1) {
           throw new Error("Team cannot link to another league if league not finished!");
@@ -220,7 +218,6 @@ class TeamController {
   async createTeam(req, res, next) {
     const name = req.body.name;
     const userId = req.user.id;
-    const description = req.body.description;
     const formationId = 1;
     const colorHome = req.body.colorHome;
     const colorAway = req.body.colorAway;
@@ -270,7 +267,6 @@ class TeamController {
       let newTeam = await TeamService.createTeam(
         name,
         manager.id,
-        description,
         formationId,
         image,
         colorHome,

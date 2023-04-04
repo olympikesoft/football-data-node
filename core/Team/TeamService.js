@@ -34,7 +34,6 @@ class TeamService {
   async createTeam(
     name,
     manager_id,
-    description,
     formationId,
     image_url,
     colorHome,
@@ -46,7 +45,6 @@ class TeamService {
         .insert({
           name,
           manager_id,
-          description,
           formationId,
           image_url,
           colorHome,

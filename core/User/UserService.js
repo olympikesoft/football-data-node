@@ -47,20 +47,62 @@ class UserService {
     return isRegistered;
   }
 
+  async registerDiscord(email, name, discord_id, username, avatar) {
+    let isRegistered = null;
+    try {
+      let form = {
+        IsValid: "y",
+        email,
+        name,
+        username,
+        discord_id,
+        avatar_url: avatar,
+      };
+      await knex("user")
+        .insert(form)
+        .then((result) => {
+          if (result) {
+            isRegistered = result[0];
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+    return isRegistered;
+  }
+
   async login(email, password) {
     let token = { token: null, id: 0 };
     try {
       const hashedPassword = await functions.hashPassword(password);
       let user = await knex("user")
-        .select(["user.id", "user.password", "user.email", "user.stars", "user.money_game"])
+        .select([
+          "user.id",
+          "user.password",
+          "user.email",
+          "user.stars",
+          "user.money_game",
+        ])
         .where("user.email", email);
       await functions
         .comparePassword(password, hashedPassword)
         .then((isMatch) => {
+          console.log(isMatch);
+          console.log( user[0]);
           if (isMatch) {
             token = {
               token: jwt.sign(
-                { id: user[0].id, name: user[0].name, email: user[0].email, stars: user[0].stars, money: user[0].money_game },
+                {
+                  id: user[0].id,
+                  name: user[0].name,
+                  email: user[0].email,
+                  stars: user[0].stars,
+                  money: user[0].money_game,
+                  avatar_url: user[0].avatar_url,
+                },
                 process.env.secret,
                 {
                   expiresIn: 86400,
@@ -92,6 +134,28 @@ class UserService {
     return userdata;
   }
 
+  async getUserByDiscord(user_id) {
+    let user = null;
+    let userdata = null;
+    try {
+      user = await knex("user")
+        .select(
+          "user.Id",
+          "user.name",
+          "user.email",
+          "user.money_game",
+          "user.stars"
+        )
+        .where("user.discord_id", "=", user_id);
+      if (user.length > 0) {
+        userdata = { user };
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return userdata;
+  }
+
   async updateUser(user_id, object) {
     let isUpdated = false;
     await knex("user")
@@ -108,9 +172,8 @@ class UserService {
     return isUpdated;
   }
 
-  async GetInformation(user_id) {
+  async getInformation(user_id) {
     let user_content = null;
-
     try {
       user_content = await knex("user")
         .select(
@@ -124,7 +187,7 @@ class UserService {
     } catch (error) {
       console.error(error);
     }
-    return user_content;
+    return user_content[0];
   }
 }
 module.exports = UserService;

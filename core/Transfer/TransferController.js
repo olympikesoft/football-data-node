@@ -63,7 +63,7 @@ class TransfersController {
         }
       }
 
-      let user_money_buy = await UserService.GetInformation(user_id);
+      let user_money_buy = await UserService.getInformation(user_id);
 
       if (parseInt(market[0].seller_team_id) === parseInt(teamUser[0].id)) {
         return res

@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
-const sgMail = require("@sendgrid/mail");
+
+const sendEmail = require('../services/email/NodeMailService');
+const path = require('path');
 
 var UserService = require("../User/UserService");
 var UserService = new UserService();
@@ -13,7 +15,6 @@ var TeamService = new TeamService();
 var LeagueService = require("../League/LeagueService");
 var LeagueService = new LeagueService();
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 class UserController {
   async login(req, res, next) {
@@ -64,50 +65,29 @@ class UserController {
     }
   }
 
-  /*
-  async getUser(req, res, next) {
-    const user_id = req.user.id;
-
-    try {
-      let existUser = await this.UserService.checkPermissionstoAction(user_id);
-
-      if (existUser) {
-        const users = await this.UserService.GetInformaton(user_id);
-        if (users) {
-          return res.status(200).json({ UserService: users });
-        } else {
-          return this.sendErrorResponse(res, 404, "error authentication");
-        }
-      } else {
-        return this.sendErrorResponse(res, 404, "not found");
-      }
-    } catch (error) {
-      console.log(error);
-      return this.sendErrorResponse(res, 500, "error");
-    }
-  }*/
-
   async register(req, res, next) {
     const email = req.body.email;
     const password = req.body.password;
     const name = req.body.name;
     let existUser = await UserService.existUser(email);
+    try {
     if (existUser) {
       return res.status(404).json({ error: "error already exist account" });
-    } else {
+    } 
+
       const registerUser = await UserService.register(email, name, password);
-      if (registerUser > 0 && registerUser) {
         let obj = { user_id: registerUser };
         const manager = await ManagerService.createManager(obj);
-        let userInfo = await UserService.getUser(registerUser);
+        let userInfo = await UserService.getInformation(registerUser);
         if (manager) {
           const token = jwt.sign(
             {
-              id: userInfo.user[0].id,
-              name: userInfo.user[0].name,
-              email: userInfo.user[0].email,
-              stars: userInfo.user[0].stars,
-              money: userInfo.user[0].money_game,
+              id: userInfo.id,
+              name: userInfo.name,
+              email: userInfo.email,
+              stars: userInfo.stars,
+              money: userInfo.money_game,
+              avatar_url: userInfo.avatar_url,
             },
             process.env.secret,
             {
@@ -120,43 +100,22 @@ class UserController {
             path: "/create-team",
           };
 
-          const msg = {
-            to: email, 
-            from: "admin@soccersquadmanager.com",
-            subject: "Registration Confirmation",
-            html: `
-              <html>
-                <head>
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <style>
-                    /* Add your responsive styles here */
-                  </style>
-                </head>
-                <body>
-                  <h1>Thank you for registering for the football game manager!</h1>
-                  <p>Here's some information about the manager:</p>
-                  <ul>
-                    <li>Manage your football games and teams in one place</li>
-                    <li>Create and share schedules with ease</li>
-                    <li>Keep track of scores and player stats</li>
-                  </ul>
-                  <p>We're excited to have you join our community. If you have any questions, please don't hesitate to contact us.</p>
-                </body>
-              </html>
-            `,
-          };
-
-          sgMail
-            .send(msg)
-            .then(() => console.log("Email sent successfully"))
-            .catch((error) => console.error(error));
+          const recipient = email;
+          const subject = 'Registration Confirmation';
+          const templatePath = path.join(__dirname, '..', '..', 'public', 'templates', 'registerUser.ejs');
+          try {
+              await sendEmail(recipient, subject, templatePath);
+              console.log('Email sent successfully');
+          } catch (error) {
+              console.error('Failed to send email:', error);
+          }
 
           return res.status(200).json(user_content);
         } else {
           return res.status(404).json({ error: "error creating manager" });
         }
-      }
-      return res.status(404).json({ error: "error register" });
+      } catch (error) {
+        console.error('Failed register:', error);
     }
   }
 }
