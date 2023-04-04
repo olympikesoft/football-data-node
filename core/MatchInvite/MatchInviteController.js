@@ -16,6 +16,8 @@ var SquadService = new SquadService();
 var PlayerService = require("../Player/PlayerService");
 var PlayerService = new PlayerService();
 
+const sendEmail = require('../services/email/NodeMailService');
+const path = require('path');
 class MatchInviteController {
   async getMatchesInviteCurrentTeam(req, res, next) {
     let userId = req.user.id;
@@ -83,6 +85,29 @@ class MatchInviteController {
         team_away[0].id
       );
       if (insertMatchInvite) {
+
+        const user = await await ManagerService.getUserByManagerId(team_away[0].manager_id);
+
+        const opponentTeam = team[0].name;
+        const acceptLink = process.env.FRONT_END_URL + '?opponentTeam=' + team[0].id;
+        
+        const emailData = {
+          name: user.name,
+          opponentTeam,
+          acceptLink
+        };
+
+        const recipient = user.email;
+        const subject = 'Invitation to Football Match';
+        const templatePath = path.join(__dirname, '..', '..', 'public', 'templates', 'inviteMatchRequest.ejs');
+        try {
+            await sendEmail(recipient, subject, templatePath, emailData);
+            console.log('Email sent successfully');
+        } catch (error) {
+            console.error('Failed to send email:', error);
+        }
+
+        // sent email notification to tell the other team that receive an invite to match
         return res.status(200).json({ insertMatchInvite: insertMatchInvite, success: true });
       } else {
         return res.status(404).json({ Message: "No Match create", success: false });

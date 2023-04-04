@@ -3,7 +3,7 @@ var knex = require("../knex");
 var functions = require("../utils/functions");
 
 module.exports = () => {
-  Cron.schedule("0 0 * * *", async () => {
+  Cron.schedule("* * * * *", async () => {
     const leagues = await knex("league").select("*");
     for (const league of leagues) {
       if (league.teams_reached === league.teams_limit && league.active === 1) {

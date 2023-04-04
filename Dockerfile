@@ -24,6 +24,8 @@ ENV DISCORD_CLIENT_SECRET 0VDEMNwogfgf-lhl6m2A552C9A7QtAGM
 ENV SENDGRID_API_KEY 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
 ENV DISCORD_CALLBACK_URL https://seal-app-pagx8.ondigitalocean.app/auth/discord/callback
 ENV NODE_MAILER_PASSWORD q56NTjwTVgi9
+ENV FRONT_END_URL http://localhost:3000
+
 
 EXPOSE 8081
 

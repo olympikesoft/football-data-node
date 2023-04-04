@@ -275,32 +275,33 @@ class TeamController {
 
       // if teamCreated create random players base on formation
       if (newTeam) {
-        // 1 goalkeeper
-        let goalKeeper = await PlayerService.insertPlayer(
-          faker.name.findName(undefined, undefined, "male"),
-          faker.date.past(25, new Date(2005, 0, 1)),
-          faker.image.imageUrl(1234, 2345),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          (Math.random() * (1.5 - 2.05) + 2.05).toFixed(4),
-          (Math.random() * (min - max) + max).toFixed(4),
-          Math.random() * (1 - 999999) + 999999,
-          1,
-          Math.random() * (1 - 5) + 5,
-          Math.random() * (minValue - maxValue) + maxValue,
-          0,
-          100
-        );
 
-        await PlayerService.insertPlayerToTeam(goalKeeper, newTeam);
+        for (let index = 0; index < 2; index++) {
+          let goalKeeper = await PlayerService.insertPlayer(
+            faker.name.findName(undefined, undefined, "male"),
+            faker.date.past(25, new Date(2005, 0, 1)),
+            faker.image.imageUrl(1234, 2345),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            (Math.random() * (1.5 - 2.05) + 2.05).toFixed(4),
+            (Math.random() * (min - max) + max).toFixed(4),
+            Math.random() * (1 - 999999) + 999999,
+            1,
+            Math.random() * (1 - 5) + 5,
+            Math.random() * (minValue - maxValue) + maxValue,
+            0,
+            100
+          );
+          await PlayerService.insertPlayerToTeam(goalKeeper, newTeam);
+        }
+
         // 4 defenders
-
-        for (let index = 0; index < 4; index++) {
+        for (let index = 0; index < 6; index++) {
           const deffender = await PlayerService.insertPlayer(
             faker.name.findName(undefined, undefined, "male"),
             faker.date.past(25, new Date(2005, 0, 1)),
@@ -326,7 +327,7 @@ class TeamController {
 
         // 4 middlefield
 
-        for (let index = 0; index < 4; index++) {
+        for (let index = 0; index < 6; index++) {
           const middlefield = await PlayerService.insertPlayer(
             faker.name.findName(undefined, undefined, "male"),
             faker.date.past(25, new Date(2005, 0, 1)),
@@ -350,7 +351,7 @@ class TeamController {
           await PlayerService.insertPlayerToTeam(middlefield, newTeam);
         }
 
-        for (let index = 0; index < 2; index++) {
+        for (let index = 0; index < 4; index++) {
           const stricker = await PlayerService.insertPlayer(
             faker.name.findName(undefined, undefined, "male"),
             faker.date.past(25, new Date(2005, 0, 1)),

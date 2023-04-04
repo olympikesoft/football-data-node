@@ -3,7 +3,6 @@ var express = require('express');
 var router = express.Router();
 
 var userMiddleware = require("../middleware/auth");
-var verifyHasManager = require("../middleware/checkManager");
 var MatchController  = require('../core/Match/MatchController')
 
 const match = new MatchController();

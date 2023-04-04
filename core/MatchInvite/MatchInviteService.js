@@ -17,6 +17,7 @@ class MatchInviteService {
     ])
       .where({ user_one_id: team_id })
       .orWhere({user_two_id: team_id })
+      .where({'match_invite.status': '1'})
       .leftJoin("team", "team.id", "match_invite.user_one_id")
       .leftJoin('team as team2', 'team2.id', 'match_invite.user_two_id')
       .orderBy('match_invite.created_at');

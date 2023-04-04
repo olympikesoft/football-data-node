@@ -18,6 +18,23 @@ class ManagerService {
     return manager_details;
   }
 
+  async getUserByManagerId(manager_id){
+    let user = null;
+    try {
+      let q = await knex
+        .select(["user.name", "user.email", "user.id", "user.avatar_url"])
+        .from("manager")
+        .where("manager.id", manager_id)
+        .leftJoin("user", "user.id", "manager.user_id")
+      if (q != undefined) {
+        user = q[0];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    return user;
+  }
+
   async checkManagerbyUser(id) {
     let manager_details = null;
     try {
