@@ -1,25 +1,32 @@
 const Cron = require("node-cron");
 const knex = require("../knex");
 const functions = require("../utils/functions");
+const sendEmail = require('../core/services/email/NodeMailService');
+const path = require('path');
 
 module.exports = () => {
-  Cron.schedule("0 * * * *", async () => {
+  Cron.schedule("* * * * *", async () => {
     const leagues = await knex("league")
       .select("*")
       .where("active", 1)
       .andWhereRaw("teams_reached = teams_limit");
 
-      console.log(leagues);
-
     for (const league of leagues) {
-      console.log(league.id);
 
       const teams = await knex("team_has_league")
         .where("league_id", league.id)
-        .select("*");
+        .leftJoin("team", "team.id", "team_has_league.team_id")
+        .leftJoin("league", "league.id", "team_has_league.league_id")
+        .select("team.*");
+
+      const usersEmails = await knex("teams").select(["user.email", "user.name"])
+      .from("team")
+      .whereIn("team.id", teams.map((el) => el.id))
+      .leftJoin("manager", "manager.id", "team.manager_id")
+      .leftJoin("user", "user.id", "manager.user_id");
 
       const roundMatches = functions.generateSchedule(
-        teams.map((el) => el.team_id)
+        teams.map((el) => el.id)
       );
 
       const matchesToInsert = [];
@@ -68,6 +75,34 @@ module.exports = () => {
       } catch (error) {
         console.log("Error updating league:", league.id, error);
       }
+
+      const emailPromises = usersEmails.map(async (user) => {
+        const emailData = {
+          round1Date: round1Date,
+          lastDate: lastDate,
+          teams: teams,
+          roundMatches: roundMatches,
+          league: league,
+          user: user
+        };
+        const recipient = user.email;
+        const subject = `🚀 Get Ready to Soar in ${league.name} - Exciting Matchups, Dates & Teams Inside!`;
+        const templatePath = path.join(__dirname, '..', 'public', 'templates', 'leagueStart.ejs');
+        try {
+          await sendEmail(recipient, subject, templatePath, emailData);
+          console.log('Email sent successfully to', recipient);
+        } catch (error) {
+          console.error('Failed to send email to', recipient, ':', error);
+        }
+      });
+      
+      try {
+        await Promise.all(emailPromises);
+        console.log('All emails sent successfully');
+      } catch (error) {
+        console.error('Failed to send some emails:', error);
+      }
+      
     }
   });
 };

@@ -7,10 +7,12 @@ class SquadService {
    * get players from squad;
    */
 
-  async getSquadDefinedWithMatch(team_id, matchId) {
-    let players = [];
+   async getSquadDefinedWithMatch(team_id, matchId) {
+    const playersMap = {};
+    const players = [];
+  
     try {
-      let q = await knex
+      const q = await knex
         .select([
           "squad.id as squad_id",
           "player.id",
@@ -31,16 +33,19 @@ class SquadService {
         .leftJoin("team", "team.id", "squad.team_id")
         .leftJoin('matchs', 'matchs.id', 'squad.match_id')
         .leftJoin("player", "player.id", "squad.Player_id");
-      if (q) {
-        if (q.length > 0) {
-          for (let index = 0; index < q.length; index++) {
-            players.push(q[index]);
+  
+      if (q && q.length > 0) {
+        for (const player of q) {
+          if (!playersMap[player.id]) {
+            playersMap[player.id] = player;
+            players.push(player);
           }
         }
       }
     } catch (error) {
       console.log(error);
     }
+  
     return players;
   }
 

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .team-name {
+      color: #2980b9;
+    }
+    .match {
+      margin-bottom: 5px;
+    }
+
+    @media screen and (max-width: 600px) {
+      .container {
+        width: 100%;
+        box-shadow: none;
+        padding: 10px;
+      }
+      body {
+        font-size: 14px;
+      }
+      h1, h2, h3 {
+        font-size: 1.25em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hey  <%= user.name %>! 🎉</h1>
+    <p>Congratulations, you've joined the ranks of the <strong> <%= league.name %></strong> warriors! 🔥 Brace yourself for an action-packed season that's sure to keep you on the edge of your seat. 🎮</p>
+
+    <h2>League Details</h2>
+    <p>🌟 League:  <%= league.name %><br>
+
+    <h2>Mark your calendars! 📅</h2>
+    <p>🚀 Blast-off Date: <%= new Date(round1Date).toLocaleDateString() %><br>
+    🏁 Finish Line: <%= new Date(lastDate).toLocaleDateString() %></p>
+
+    <h2>🏆 Meet Your Fellow Gladiators:</h2>
+    <ul>
+        <% for (const team of teams) { %>
+            <li class="team-name">🛡️ <%= team.name %></li>
+        <% } %>
+    </ul>
+
+    <h2>🥊 Match Schedule of Destiny:</h2>
+    <% for (const round of roundMatches) { %>
+        <h3>⚔️ Round <%= round[0].round %>:</h3>
+        <% for (const match of round) { %>
+            <% const homeTeam = teams.find(team => team.id === match.home_team); %>
+            <% const awayTeam = teams.find(team => team.id === match.away_team); %>
+            <p class="match">📅 <%= new Date(match.date).toLocaleDateString() %> <%= homeTeam.name %> 🆚 <%= awayTeam.name %></p>
+        <% } %>
+    <% } %>
+
+    <p>Ready, set, go! 🚦 Dive into the exhilarating world of <%= league.name %> and show off your skills. 🌟</p>
+
+    <p>If you need a helping hand or have questions, our legendary support team is just a message away. 💌</p>
+
+    <p>Best of luck, champion! 🏆</p>
+    <p>Your friends at,<br>
+    🚀 Customer Support Team</p>
+</div>
+</body>
+</html>
