@@ -5,43 +5,37 @@ var logger = require("morgan");
 require("dotenv").config();
 const cors = require("cors");
 const session = require("express-session");
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
-const DiscordStrategy = require("passport-discord").Strategy;
-const DiscordOAuth2 = require("discord-oauth2");
 
-require("./schedule/matches")();
-require("./schedule/league")();
-require("./schedule/squad")();
+var firebase = require("firebase/compat/app");
+require("firebase/compat/database");
 
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var matchRouter = require("./routes/match");
-var teamRouter = require("./routes/team");
-var authRouter = require("./routes/auth");
-var transferRouter = require("./routes/transfer");
-var playerRouter = require("./routes/player");
-var squadRouter = require("./routes/squad");
-var matchInviteRouter = require("./routes/matchinvite");
-var transactionRouter = require("./routes/transactions");
-var rankingRouter = require("./routes/ranking");
-var leagueRouter = require("./routes/league");
+const stripe = require("stripe")("sk_test_NEbjH7cEfVImWXfCVnVZc5Ar");
 
-var UserService = require("./core/User/UserService");
-var UserService = new UserService();
+const firebaseConfig = {
+  apiKey: "AIzaSyALE9n5g1VbyvlljRA349MnF4gYJDausaM",
+  authDomain: "kidstreamplay.firebaseapp.com",
+  databaseURL: "https://kidstreamplay-default-rtdb.firebaseio.com",
+  projectId: "kidstreamplay",
+  storageBucket: "kidstreamplay.appspot.com",
+  messagingSenderId: "331334625731",
+  appId: "1:331334625731:web:8295ac0128f4bd6130f576",
+  measurementId: "G-VXC5XJYF5N",
+};
 
-var ManagerService = require("./core/Manager/ManagerService");
-var ManagerService = new ManagerService();
+firebase.initializeApp(firebaseConfig);
 
-var TeamService = require("./core/Team/TeamService");
-var TeamService = new TeamService();
+var db = firebase.database();
 
-var LeagueService = require("./core/League/LeagueService");
-var LeagueService = new LeagueService();
+//require("./schedule/matches")();
+//require("./schedule/league")();
+//require("./schedule/squad")();
 
+var paymentsRouter = require("./routes/payments");
+var subscriptionsRouter = require("./routes/subscriptions");
+var accountsRouter = require("./routes/accounts");
+var moviesRouter = require("./routes/movies");
 
 var app = express();
-// var server = app.listen(port); socket.io
 
 app.use(logger("dev"));
 app.use(express.json());
@@ -54,9 +48,6 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(passport.initialize());
-app.use(passport.session());
-
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(cors());
@@ -70,143 +61,35 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/oauth/callback', async (req, res) => {
+  const { code, state } = req.query; // state contains the user ID
 
-const discordOAuth2 = new DiscordOAuth2({
-  clientId: process.env.DISCORD_CLIENT_ID,
-  clientSecret: process.env.DISCORD_CLIENT_SECRET,
-  redirectUri: "http://localhost:9000/auth/discord/callback",
-});
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.use(
-  new DiscordStrategy(
-    {
-      clientID: process.env.DISCORD_CLIENT_ID,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET,
-      callbackURL: "http://localhost:9000/auth/discord/callback",
-      scope: ["identify", "email"],
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      const discordUser = await discordOAuth2.getUser(accessToken);
-
-      let userInfo = await UserService.getUserByDiscord(discordUser.id);
-
-      if (!userInfo) {
-      const registerUser = await UserService.registerDiscord(
-        discordUser.email,
-        discordUser.username,
-        discordUser.id,
-        discordUser.username,
-        `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
-      );
-        let obj = { user_id: registerUser };
-        await ManagerService.createManager(obj);
-        let user = await UserService.getUser(registerUser);
-        const token = jwt.sign(
-          {
-            id: user.user[0].id,
-            name: user.user[0].name,
-            email: user.user[0].email,
-            stars: user.user[0].stars,
-            money: user.user[0].money_game,
-            avatar_url: user.user[0].avatar_url,
-          },
-          process.env.secret,
-          {
-            expiresIn: 86400,
-          }
-        );
-        let user_content = {
-          token: token,
-          user: user.user,
-          path: "/create-team",
-        };
-        return done(null, user_content);
-      } else {
-        const token = jwt.sign(
-          {
-            id: userInfo.user[0].id,
-            name: userInfo.user[0].name,
-            email: userInfo.user[0].email,
-            stars: userInfo.user[0].stars,
-            money: userInfo.user[0].money_game,
-            avatar_url: user.user[0].avatar_url,
-          },
-          process.env.secret,
-          {
-            expiresIn: 86400,
-          }
-        );
-        let path = "/lineup-team";
-        let checkTeam = await TeamService.getTeamByUser(userInfo.user[0].id);
-        if (checkTeam.length === 0) {
-          path = "/create-team?step=1"; // create-team
-        }
-        if (checkTeam.length > 0) {
-          let teamHasLeague = await LeagueService.getTeamLeagues(
-            checkTeam[0].id
-          );
-
-          if (teamHasLeague.length === 0) {
-            path = "/create-team?step=2";
-          } else {
-            let league = await LeagueService.getLeagueById(
-              teamHasLeague[0].league_id
-            );
-            if (league[0].status === 2) {
-              path = "/create-team?step=2";
-            }
-          }
-        }
-        let user_content = {
-          token: token,
-          user: userInfo,
-          path: path,
-        };
-        return done(null, user_content);
-      }
-    }
-  )
-);
-
-app.get('/auth/discord', passport.authenticate('discord'));
-app.get('/auth/discord/callback',
-    passport.authenticate('discord', { failureRedirect: '/' }),
-    function(req, res) {
-        res.json(req.user);
-    }
-);
-
-app.get("/api/user", (req, res) => {
-  const token = req.cookies.jwt;
-  if (!token) {
-    return res.sendStatus(401);
-  }
   try {
-    const user = jwt.verify(token, process.env.secret);
-    res.json(user);
-  } catch (err) {
-    res.sendStatus(401);
+    const response = await stripe.oauth.token({
+      grant_type: 'authorization_code',
+      code: code,
+    });
+
+    const { stripe_user_id } = response;
+
+    // Store stripe_user_id in Firebase
+    var key = "users/" + state;
+    let postData = {
+      [key + '/stripeAccountId']: stripe_user_id
+    };
+    await db.ref().update(postData);
+
+    res.redirect('http://localhost:5173/settings/success-stripe');
+  } catch (error) {
+    console.error('Error in OAuth callback: ', error);
+    res.status(500).json({ error: 'Failed in OAuth callback' });
   }
 });
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/api/match", matchRouter);
-app.use("/api/team", teamRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/transfer", transferRouter);
-app.use("/api/player", playerRouter);
-app.use("/api/squad", squadRouter);
-app.use("/api/match-invite", matchInviteRouter);
-app.use("/api/transaction", transactionRouter);
-app.use("/api/ranking", rankingRouter);
-app.use("/api/league", leagueRouter);
+
+app.use("/api/payments", paymentsRouter);
+app.use("/api/subscriptions", subscriptionsRouter);
+app.use("/api/accounts", accountsRouter);
+app.use("/api/movies", moviesRouter);
 
 module.exports = app;

@@ -13,10 +13,6 @@ COPY . .
 
 # Set environment variables for the app
 ENV NODE_ENV dev
-ENV DB_HOST SG-bird-handle-7872-7413-mysql-master.servers.mongodirector.com
-ENV DB_USER sgroot
-ENV DB_PASSWORD kTEnc6v-MyY81OFb
-ENV DB_NAME footballdata
 ENV PORT 8081
 ENV secret supersecretkey
 ENV DISCORD_CLIENT_ID 1076096752660258836
