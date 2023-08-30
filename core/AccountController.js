@@ -3,7 +3,7 @@
 var firebase = require("firebase/compat/app");
 require("firebase/compat/database");
 
-const stripe = require("stripe")("sk_test_NEbjH7cEfVImWXfCVnVZc5Ar");
+const stripe = require("stripe")("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");
 
 const firebaseConfig = {
   apiKey: "AIzaSyALE9n5g1VbyvlljRA349MnF4gYJDausaM",
@@ -90,6 +90,25 @@ class AccountController {
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Failed to get followers account" });
+    }
+  }
+
+  async getCompanyAccounts(req, res, next){
+    try {
+      const snapshot = await db
+        .ref("/users/")
+        .orderByChild("admin")
+        .equalTo( true)
+        .once("value");
+      const data = snapshot.val();
+      if (data) {
+            res.json({companies: data});
+      } else {
+        res.status(404).send({ message: "Not Found" });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Failed to get companies" });
     }
   }
 

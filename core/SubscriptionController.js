@@ -3,7 +3,7 @@
 var firebase = require("firebase/compat/app");
 require("firebase/compat/database");
 
-const stripe = require("stripe")("sk_test_NEbjH7cEfVImWXfCVnVZc5Ar");
+const stripe = require("stripe")("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");
 
 const firebaseConfig = {
   apiKey: "AIzaSyALE9n5g1VbyvlljRA349MnF4gYJDausaM",
@@ -22,6 +22,7 @@ var db = firebase.database();
 
 class SubscriptionController {
   async createCheckoutSessionSubscription(req, res, next) {
+    const isWeb = req.headers['platform'] === 'web';
     const { subscriptionPlanUuid, userUuid } = req.body;
 
     try {
@@ -30,13 +31,6 @@ class SubscriptionController {
         .ref("/subscriptionPlans/" + subscriptionPlanUuid)
         .once("value");
       const subscriptionPlanData = snapshot.val();
-
-      /*await stripe.oauth.deauthorize({
-        client_id: 'ca_DLjZpREBPxO444e91yxmOnuB5rmSSCmw',
-        stripe_user_id: 'acct_1GT7eiEPdBJb8vAw',
-      }, function(err, response) {
-        // asynchronously called
-      });*/
 
       const user = await db
       .ref("/users/" + subscriptionPlanData.creatorId)
@@ -50,6 +44,9 @@ class SubscriptionController {
 
       let accountId = userData.stripeAccountId;
 
+      const successUrl = 'http://localhost:5173/payment/success-stripe';
+      const cancelUrl = 'http://localhost:9000/api/payments/cancel-payment';
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
         line_items: [
@@ -62,8 +59,8 @@ class SubscriptionController {
           application_fee_amount: 200,
         },
         mode: 'payment',
-        success_url: 'http://localhost:5173/payment/success-stripe',
-        cancel_url: 'http://localhost:9000/api/payments/cancel-payment',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
       }, {stripeAccount: accountId}); 
 
       var key = db.ref("subscriptions").push().key;

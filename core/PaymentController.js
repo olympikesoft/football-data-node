@@ -3,7 +3,7 @@
 var firebase = require("firebase/compat/app");
 require("firebase/compat/database");
 
-const stripe = require("stripe")("sk_test_NEbjH7cEfVImWXfCVnVZc5Ar");
+const stripe = require("stripe")("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");
 
 const firebaseConfig = {
   apiKey: "AIzaSyALE9n5g1VbyvlljRA349MnF4gYJDausaM",
@@ -21,38 +21,10 @@ firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
 class PaymentController {
-  async cancelPayment(req, res, next) {
-    let user_id = req.user.id;
-    let position_id = req.body.position_id;
-    try {
-      let team_id = await TeamService.getTeamByUser(user_id);
-      let players_from_team = await PlayerService.getPlayersfromTeam(
-        team_id[0].id
-      );
-      let players = await TransferService.GetTransfersExcludingPlayers(
-        team_id[0].id,
-        players_from_team.length > 0
-          ? players_from_team.map((el) => el.player_id)
-          : [],
-        position_id ?? ""
-      );
-      if (players.length > 0) {
-        return res.status(200).json({ players: players });
-      } else {
-        return res.status(404).json({ message: "No players on market" });
-      }
-    } catch (err) {
-      if (err) {
-        next(err);
-      }
-    }
-  }
 
   async acceptPayment(req, res, next) {
     try {
       const event = req.body;
-      event.data.object.id =
-        "cs_test_a1244pgyrawde7jS7iPDykiLYvTpbuo5nuelRntar6PdvszGNugeIHv7Ao";
       if (event.type === "checkout.session.completed") {
         const session = event.data.object;
 
@@ -136,66 +108,36 @@ class PaymentController {
     }
   }
 
-  async recurrentPayment(req, res, next) {
-    let user_id = req.user.id;
-    let playerId = parseInt(req.body.playerId);
-    let price = parseInt(req.body.price);
-    try {
-      let checkPlayerAlreadySale = await TransferService.checkPlayerAlreadySale(
-        user_id,
-        playerId
-      );
-
-      if (checkPlayerAlreadySale.length > 0) {
-        return res.status(200).json({
-          message: "You cannot sell the same player twice",
-          success: false,
-        });
-      }
-      let teamUser = await TeamService.getTeamByUser(user_id);
-
-      let players_from_team = await PlayerService.getPlayersfromTeam(
-        teamUser[0].id
-      );
-
-      if (players_from_team.length < 11) {
-        if (
-          players_from_team.filter((x) => x.player_id === market[0].player_id)
-            .length > 0
-        ) {
-          return res.status(200).json({
-            message: "You cannot sell player",
-            success: false,
-          });
-        }
-      }
-
-      let sellPlayer = await TransferService.sellerTeamPlayer(
-        teamUser[0].id,
-        playerId,
-        price
-      );
-      if (sellPlayer) {
-        return res.status(200).json({ success: true });
-      } else {
-        return res.status(200).json({
-          message: "Error on adding player to buyer, try later",
-          success: false,
-        });
-      }
-    } catch (err) {
-      if (err) {
-        next(err);
-      }
-    }
-  }
-
   async getPaymentsUser(req, res, next) {
     let { userUuid } = req.body;
     try {
       const snapshot = await db
         .ref("/payments/")
         .orderByChild("userUuid")
+        .equalTo(userUuid)
+        .once("value");
+      const data = snapshot.val();
+      if (data) {
+        let payments = [];
+        for (let payment in data) {
+          payments.push({
+            id: payment,
+            ...data[payment],
+          });
+        }
+        res.json(payments);
+      } else {
+        res.json({ message: "No payments found" });
+      }
+    } catch (error) {}
+  }
+
+  async getPaymentsCreators(req, res, next) {
+    let { userUuid } = req.body;
+    try {
+      const snapshot = await db
+        .ref("/payments/")
+        .orderByChild("receiverUuid")
         .equalTo(userUuid)
         .once("value");
       const data = snapshot.val();
