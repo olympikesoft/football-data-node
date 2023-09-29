@@ -37,6 +37,36 @@ class MovieController {
     return snapshot.val();
   }
 
+  async getMoviesPaidWatch(req, res, next) {
+    const { typeVideo } = req.query;
+    let finalType = typeVideo?.replace("?", "");
+    console.log(finalType);
+
+    try {
+      const snapshot = await db
+        .ref("/movies/")
+        .orderByChild("isFree")
+        .once("value");
+
+      const data = snapshot.val();
+      if (data) {
+        let movies = [];
+        for (let key in data) {
+          const movieData = data[key];
+          if (movieData.movieType === finalType  && movieData.isFree !== "Free") {
+            movieData.id = key;
+            movies.push(movieData);
+          }
+        }
+        res.json(movies);
+      }
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json({ error: "Failed to get movies paid" });
+    }
+  }
+
   async getMoviesFreeWatch(req, res, next) {
     const { typeVideo } = req.query;
     let finalType = typeVideo.replace("?", "");
